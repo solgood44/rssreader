@@ -70,6 +70,60 @@ export function shuffleEntries(entries: ShowListEntry[], seed: number): ShowList
   return out;
 }
 
+function hashString(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return h;
+}
+
+/** YYYYMMDD in UTC — stable for a calendar day for rotating recommendations. */
+function utcDayStamp(): number {
+  const d = new Date();
+  return d.getUTCFullYear() * 10_000 + (d.getUTCMonth() + 1) * 100 + d.getUTCDate();
+}
+
+/**
+ * Podcasts similar to the current show (shared taxonomy categories first), then the rest.
+ * Order shuffles with a seed derived from slug + UTC day so the set rotates daily.
+ */
+export function recommendedShowEntries(
+  currentSlug: string,
+  entries: ShowListEntry[],
+  limit: number,
+): ShowListEntry[] {
+  const pool = entries.filter((e) => e.slug !== currentSlug);
+  const current = entries.find((e) => e.slug === currentSlug);
+  const cats = new Set(
+    (current?.categories ?? []).map((c) => c.toLowerCase().trim()).filter(Boolean),
+  );
+
+  const same: ShowListEntry[] = [];
+  const other: ShowListEntry[] = [];
+  for (const e of pool) {
+    const overlap = e.categories.some((c) => cats.has(c.toLowerCase().trim()));
+    if (cats.size > 0 && overlap) same.push(e);
+    else other.push(e);
+  }
+
+  const day = utcDayStamp();
+  const seed = hashString(currentSlug) ^ day ^ 0xbeefcafe;
+  const seed2 = seed ^ 0xdeadbeef;
+
+  const shuffledSame = shuffleEntries(same, seed);
+  const shuffledOther = shuffleEntries(other, seed2);
+
+  const out: ShowListEntry[] = [];
+  for (const e of shuffledSame) {
+    if (out.length >= limit) break;
+    out.push(e);
+  }
+  for (const e of shuffledOther) {
+    if (out.length >= limit) break;
+    out.push(e);
+  }
+  return out;
+}
+
 export function sortEntries(
   entries: ShowListEntry[],
   mode: SortMode,

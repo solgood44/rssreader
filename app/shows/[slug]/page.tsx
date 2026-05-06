@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllShows, getShow } from "@/lib/content";
+import { recommendedShowEntries, showsToListEntries } from "@/lib/show-search";
 import { fetchRssEpisodes } from "@/lib/rss";
 import { detectNumberedEpisodes, resolveEpisodeSort } from "@/lib/episode-sort";
 import { EpisodeList } from "@/components/EpisodeList";
 import { Markdown } from "@/components/Markdown";
 import { OptimizedCover } from "@/components/OptimizedCover";
 import { ShowFavoriteHeart } from "@/components/ShowFavoriteHeart";
+import { ShowCard } from "@/components/ShowCard";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -29,7 +31,8 @@ export default async function ShowPage({ params, searchParams }: Props) {
   const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
   const sortParam = sp.sort;
 
-  const show = getShow(slug);
+  const allShows = getAllShows();
+  const show = allShows.find((s) => s.slug === slug);
   if (!show) notFound();
 
   let episodes: Awaited<ReturnType<typeof fetchRssEpisodes>> = [];
@@ -48,6 +51,9 @@ export default async function ShowPage({ params, searchParams }: Props) {
     sortParam === "newest" || sortParam === "oldest" || sortParam === "episode" ? sortParam : undefined;
 
   const cover = show.data.cover_image;
+
+  const listEntries = showsToListEntries(allShows);
+  const recommended = recommendedShowEntries(show.slug, listEntries, 6);
 
   return (
     <div>
@@ -125,6 +131,22 @@ export default async function ShowPage({ params, searchParams }: Props) {
           page={page}
         />
       )}
+
+      {recommended.length > 0 ? (
+        <section className="show-recommended" aria-labelledby="show-recommended-heading">
+          <h2 id="show-recommended-heading" className="section-title">
+            You might also like
+          </h2>
+          <p className="section-sub">
+            Picks from the same categories when we have them; others fill in from the catalog. Refreshes daily.
+          </p>
+          <div className="card-grid">
+            {recommended.map((s) => (
+              <ShowCard key={s.slug} show={s} />
+            ))}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }
