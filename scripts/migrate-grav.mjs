@@ -65,8 +65,6 @@ function main() {
   ensureDir(path.join(APP_ROOT, "content", "shows"));
   ensureDir(path.join(APP_ROOT, "content", "blog"));
   ensureDir(path.join(APP_ROOT, "content", "categories"));
-  ensureDir(path.join(APP_ROOT, "content", "products"));
-
   const shows = copyDirMd(path.join(PAGES, "01.shows"), path.join(APP_ROOT, "content", "shows"));
   console.log("Shows:", shows);
 
@@ -90,25 +88,6 @@ function main() {
   console.log("Categories:", cats);
 
   writeHome();
-
-  const sampleProduct = path.join(APP_ROOT, "content", "products", "example-template.md");
-  if (!fs.existsSync(sampleProduct)) {
-    fs.writeFileSync(
-      sampleProduct,
-      `---
-title: Example affiliate product
-description: Replace with a real offer — this file is optional.
-affiliate_url: https://example.com
-price_note: Pricing varies
-image: https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80
----
-
-Short human-written blurb about why this product fits your audience.
-`,
-      "utf8",
-    );
-    console.log("Wrote sample content/products/example-template.md");
-  }
 
   console.log("Done.");
 }

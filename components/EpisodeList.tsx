@@ -1,9 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useRef, useState } from "react";
 import type { RssEpisode } from "@/lib/rss";
+import { EpisodeRowAudio } from "./EpisodeRowAudio";
 
 const EPISODES_PAGE_SIZE = 40;
 
@@ -15,13 +14,9 @@ type Props = {
 };
 
 /**
- * Episodes play inline on the show page only — audio URLs stay on the host/CDN from the RSS enclosure.
+ * Each episode has its own player, timeline, and ring progress (listen state in localStorage).
  */
 export function EpisodeList({ showSlug, coverFallback, episodes, page = 1 }: Props) {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [audioPaused, setAudioPaused] = useState(true);
-
   const sorted = [...episodes].sort((a, b) => {
     const ta = a.pubDate ? Date.parse(a.pubDate) : 0;
     const tb = b.pubDate ? Date.parse(b.pubDate) : 0;
@@ -31,89 +26,12 @@ export function EpisodeList({ showSlug, coverFallback, episodes, page = 1 }: Pro
   const slice = sorted.slice(start, start + EPISODES_PAGE_SIZE);
   const hasMore = start + EPISODES_PAGE_SIZE < sorted.length;
 
-  const playEpisode = useCallback(
-    (ep: RssEpisode) => {
-      if (!ep.audioUrl || !audioRef.current) return;
-      const el = audioRef.current;
-      if (activeId === ep.id) {
-        if (el.paused) void el.play().catch(() => {});
-        else el.pause();
-        return;
-      }
-      el.src = ep.audioUrl;
-      setActiveId(ep.id);
-      void el.play().catch(() => {});
-    },
-    [activeId],
-  );
-
-  const hasAnyAudio = slice.some((e) => e.audioUrl);
-
   return (
     <>
-      {hasAnyAudio ? (
-        <div className="show-audio-shell">
-          <p className="show-audio-shell__label" id="show-audio-label">
-            Now playing on this page
-          </p>
-          <audio
-            ref={audioRef}
-            className="audio-player show-audio-shell__player"
-            controls
-            preload="metadata"
-            aria-labelledby="show-audio-label"
-            onPlay={() => setAudioPaused(false)}
-            onPause={() => setAudioPaused(true)}
-          />
-        </div>
-      ) : null}
-
-      <ol className="episode-list">
-        {slice.map((ep) => {
-          const thumb = ep.image || coverFallback;
-          const isRowActive = activeId === ep.id;
-          const label = isRowActive && !audioPaused ? "Pause" : "Play";
-          return (
-            <li key={ep.id} className={`episode-list__item${isRowActive ? " episode-list__item--active" : ""}`}>
-              {thumb ? (
-                <div className="episode-list__thumb" aria-hidden>
-                  <Image src={thumb} alt="" width={72} height={72} sizes="72px" quality={65} className="episode-list__thumb-img" />
-                </div>
-              ) : (
-                <div className="episode-list__thumb episode-list__thumb--empty" aria-hidden />
-              )}
-              <div className="episode-list__body">
-                <div className="episode-list__text">
-                  <span className="episode-list__title">{ep.title}</span>
-                  {ep.pubDate ? (
-                    <time className="episode-list__date" dateTime={ep.pubDate}>
-                      {new Date(ep.pubDate).toLocaleDateString()}
-                    </time>
-                  ) : null}
-                </div>
-                <div className="episode-list__actions">
-                  {ep.audioUrl ? (
-                    <button
-                      type="button"
-                      className="episode-list__play"
-                      onClick={() => playEpisode(ep)}
-                      aria-label={`${label}: ${ep.title}`}
-                    >
-                      {label}
-                    </button>
-                  ) : (
-                    <span className="episode-list__no-audio">No stream</span>
-                  )}
-                  {ep.link ? (
-                    <a className="episode-list__out" href={ep.link} target="_blank" rel="noreferrer">
-                      Spreaker ↗
-                    </a>
-                  ) : null}
-                </div>
-              </div>
-            </li>
-          );
-        })}
+      <ol className="episode-list episode-list--stacked">
+        {slice.map((ep) => (
+          <EpisodeRowAudio key={ep.id} ep={ep} coverFallback={coverFallback} />
+        ))}
       </ol>
       {hasMore ? (
         <p className="pager">

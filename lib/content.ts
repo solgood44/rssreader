@@ -46,14 +46,6 @@ export type CategoryFrontmatter = {
   category_rss_allowlist?: string[];
 };
 
-export type ProductFrontmatter = {
-  title: string;
-  description?: string;
-  affiliate_url?: string;
-  image?: string;
-  price_note?: string;
-};
-
 function readMdDir(dir: string): { slug: string; raw: string }[] {
   if (!fs.existsSync(dir)) return [];
   return fs
@@ -119,23 +111,6 @@ export function getCategory(slug: string) {
   const raw = fs.readFileSync(file, "utf8");
   const { data, content } = matter(raw);
   return { slug, data: data as CategoryFrontmatter, body: content.trim() };
-}
-
-export function getAllProducts(): { slug: string; data: ProductFrontmatter; body: string }[] {
-  const dir = contentPath("products");
-  if (!fs.existsSync(dir)) return [];
-  return readMdDir(dir).map(({ slug, raw }) => {
-    const { data, content } = matter(raw);
-    return { slug, data: data as ProductFrontmatter, body: content.trim() };
-  });
-}
-
-export function getProduct(slug: string) {
-  const file = contentPath("products", `${slug}.md`);
-  if (!fs.existsSync(file)) return null;
-  const raw = fs.readFileSync(file, "utf8");
-  const { data, content } = matter(raw);
-  return { slug, data: data as ProductFrontmatter, body: content.trim() };
 }
 
 /** Blog slug as in Grav `routes.default` when present. */

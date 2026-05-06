@@ -221,35 +221,64 @@ a:hover {
   padding: 0;
   margin: 0;
 }
-.show-audio-shell {
-  margin-bottom: 1.25rem;
-  padding: 1rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-}
-.show-audio-shell__label {
-  margin: 0 0 0.5rem;
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-.show-audio-shell__player {
-  margin: 0;
-}
 
-.episode-list__item {
+.episode-list--stacked .episode-list__item {
   display: flex;
-  gap: 1rem;
-  padding: 0.75rem 0;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.65rem;
+  padding: 1rem 0;
   border-bottom: 1px solid var(--border);
 }
-.episode-list__item--active {
-  background: rgba(110, 231, 183, 0.06);
-  margin: 0 -0.75rem;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-  border-radius: 8px;
+
+.episode-list__row-head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
 }
+
+.episode-list__item--completed .episode-list__title {
+  color: var(--muted);
+}
+
+.ep-ring-btn {
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--accent);
+  line-height: 0;
+  border-radius: 50%;
+}
+.ep-ring-btn:hover {
+  color: #9cf5d4;
+}
+.ep-ring-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.ep-ring-btn--disabled {
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.45;
+}
+.ep-ring-btn__track {
+  stroke: var(--border);
+}
+.ep-ring-btn__fill {
+  stroke: var(--accent);
+  transition: stroke-dashoffset 0.2s ease;
+}
+.ep-ring-btn__fill--done {
+  stroke: #5ad4a8;
+  opacity: 0.85;
+}
+.ep-ring-btn__icon {
+  color: var(--text);
+}
+
 .episode-list__thumb {
   flex-shrink: 0;
   border-radius: 8px;
@@ -264,44 +293,14 @@ a:hover {
 .episode-list__thumb-img {
   object-fit: cover;
 }
-.episode-list__body {
-  flex: 1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-  min-width: 0;
-}
 .episode-list__text {
   flex: 1;
-  min-width: 140px;
-}
-.episode-list__actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-shrink: 0;
-}
-.episode-list__play {
-  font: inherit;
-  cursor: pointer;
-  padding: 0.35rem 0.85rem;
-  border-radius: 8px;
-  border: 1px solid var(--accent);
-  background: transparent;
-  color: var(--accent);
-}
-.episode-list__play:hover {
-  background: rgba(110, 231, 183, 0.12);
+  min-width: 0;
 }
 .episode-list__no-audio {
   font-size: 0.85rem;
   color: var(--muted);
-}
-.episode-list__out {
-  font-size: 0.85rem;
-  color: var(--muted);
+  margin: 0;
 }
 .episode-list__title {
   color: var(--text);
@@ -312,6 +311,11 @@ a:hover {
   display: block;
   font-size: 0.85rem;
   color: var(--muted);
+}
+
+.episode-list__audio {
+  margin: 0;
+  width: 100%;
 }
 
 .pager {
@@ -328,7 +332,7 @@ a:hover {
 
 .audio-player {
   width: 100%;
-  margin: 1rem 0 1.5rem;
+  margin: 0;
 }
 
 .md {
@@ -379,12 +383,3 @@ a:hover {
   color: var(--muted);
 }
 
-.product-card {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.25rem;
-  background: var(--surface);
-}
-.product-card h2 {
-  margin-top: 0;
-}

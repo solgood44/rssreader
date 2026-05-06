@@ -4,7 +4,6 @@ const navBrowse = [
   { href: "/shows", label: "All shows" },
   { href: "/category", label: "Categories" },
   { href: "/blog", label: "Blog" },
-  { href: "/products", label: "Products" },
 ];
 
 export function SiteChrome({ children }: { children: React.ReactNode }) {
