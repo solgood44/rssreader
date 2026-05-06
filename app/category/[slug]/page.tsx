@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import {
   getAllCategories,
@@ -7,8 +8,9 @@ import {
   showsForCategoryConfig,
 } from "@/lib/content";
 import { showsToListEntries } from "@/lib/show-search";
-import { ShowCard } from "@/components/ShowCard";
+import { CategoryShowsClient } from "@/components/CategoryShowsClient";
 import { Markdown } from "@/components/Markdown";
+import { ShowCard } from "@/components/ShowCard";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -38,6 +40,7 @@ export default async function CategoryPage({ params }: Props) {
     );
   }
   const shows = showsToListEntries(records);
+  const defaultSort = allow && allow.length > 0 ? null : "az";
 
   return (
     <div>
@@ -55,11 +58,17 @@ export default async function CategoryPage({ params }: Props) {
           ? `${shows.length} shows in this collection.`
           : `${shows.length} shows tagged “${cat.data.category_match?.replace(/\*\*/g, "").trim() ?? ""}”.`}
       </p>
-      <div className="card-grid">
-        {shows.map((s) => (
-          <ShowCard key={s.slug} show={s} />
-        ))}
-      </div>
+      <Suspense
+        fallback={
+          <div className="card-grid">
+            {shows.map((s) => (
+              <ShowCard key={s.slug} show={s} />
+            ))}
+          </div>
+        }
+      >
+        <CategoryShowsClient entries={shows} defaultSort={defaultSort} />
+      </Suspense>
     </div>
   );
 }
