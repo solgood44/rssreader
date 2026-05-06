@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Suspense } from "react";
 import { AudioDock } from "@/components/audio/AudioDock";
 import { AudioPlayerProvider } from "@/components/audio/AudioPlayerContext";
 import { AppChrome } from "@/components/AppChrome";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { PageView } from "@/components/analytics/PageView";
 import { getAllCategories, getAllShows } from "@/lib/content";
 import { showsToListEntries } from "@/lib/show-search";
 import "./globals.css";
@@ -49,6 +53,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </AppChrome>
           <AudioDock />
         </AudioPlayerProvider>
+        <SpeedInsights />
+        <GoogleAnalytics />
+        <Suspense fallback={null}>
+          <PageView />
+        </Suspense>
       </body>
     </html>
   );

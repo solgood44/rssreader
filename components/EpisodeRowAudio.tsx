@@ -98,6 +98,7 @@ export function EpisodeRowAudio({ ep, coverFallback, showTitle, showSlug }: Prop
       artwork: thumb,
       showTitle,
       showSlug,
+      episodeId: ep.id,
     });
   }, [url, isActive, player, ep.title, thumb, showTitle, showSlug]);
 

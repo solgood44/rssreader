@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { getListenRecord, saveListenRecord } from "@/lib/listen-progress-storage";
+import { gaAudioEvent } from "@/lib/analytics";
 
 const VOLUME_KEY = "rssreader_volume_v1";
 const SAVE_PROGRESS_MS = 2000;
@@ -20,6 +21,7 @@ export type TrackMeta = {
   artwork?: string;
   showTitle?: string;
   showSlug?: string;
+  episodeId?: string;
 };
 
 type SleepMode = "off" | "timer" | "end";
@@ -80,6 +82,8 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
   const volumeRef = useRef(1);
   const lastProgressSave = useRef(0);
   const sleepModeRef = useRef<SleepMode>("off");
+  const lastSeekFrom = useRef<number | null>(null);
+  const milestonesRef = useRef<Map<string, Set<number>>>(new Map());
 
   const [current, setCurrent] = useState<TrackMeta | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -143,10 +147,34 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     const audio = audioRef.current;
     if (!audio) return;
 
-    const onPlay = () => setIsPlaying(true);
+    const onPlay = () => {
+      setIsPlaying(true);
+      const t = currentRef.current;
+      if (t) {
+        gaAudioEvent("audio_play", {
+          audio_url: t.url,
+          episode_title: t.title,
+          episode_id: t.episodeId,
+          show_title: t.showTitle,
+          show_slug: t.showSlug,
+        });
+      }
+    };
     const onPause = () => {
       setIsPlaying(false);
       flushProgress();
+      const t = currentRef.current;
+      if (t) {
+        gaAudioEvent("audio_pause", {
+          audio_url: t.url,
+          episode_title: t.title,
+          episode_id: t.episodeId,
+          show_title: t.showTitle,
+          show_slug: t.showSlug,
+          position_sec: audio.currentTime,
+          duration_sec: audio.duration,
+        });
+      }
     };
     const onTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
@@ -160,6 +188,32 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
         const frac = Math.min(1, audio.currentTime / d);
         saveListenRecord(url, frac >= 0.97 ? 1 : frac, frac >= 0.97);
       }
+
+      // Milestone analytics (fire once per track at 25/50/75/90%).
+      const t = currentRef.current;
+      if (!t) return;
+      const pct = (audio.currentTime / d) * 100;
+      const marks = [25, 50, 75, 90];
+      let set = milestonesRef.current.get(t.url);
+      if (!set) {
+        set = new Set<number>();
+        milestonesRef.current.set(t.url, set);
+      }
+      for (const m of marks) {
+        if (pct >= m && !set.has(m)) {
+          set.add(m);
+          gaAudioEvent("audio_progress", {
+            audio_url: t.url,
+            episode_title: t.title,
+            episode_id: t.episodeId,
+            show_title: t.showTitle,
+            show_slug: t.showSlug,
+            progress_percent: m,
+            position_sec: audio.currentTime,
+            duration_sec: d,
+          });
+        }
+      }
     };
     const onLoadedMeta = () => {
       const d = audio.duration;
@@ -169,6 +223,17 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       setIsPlaying(false);
       const url = currentRef.current?.url;
       if (url) saveListenRecord(url, 1, true);
+      const t = currentRef.current;
+      if (t) {
+        gaAudioEvent("audio_complete", {
+          audio_url: t.url,
+          episode_title: t.title,
+          episode_id: t.episodeId,
+          show_title: t.showTitle,
+          show_slug: t.showSlug,
+          duration_sec: audio.duration,
+        });
+      }
       if (sleepModeRef.current === "end") clearSleepTimer();
     };
 
@@ -192,6 +257,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     if (!audio) return;
     setCurrent(t);
     currentRef.current = t;
+    milestonesRef.current.set(t.url, new Set());
     audio.volume = volumeRef.current;
     audio.src = t.url;
 
@@ -205,6 +271,14 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     audio.addEventListener("loadedmetadata", onMeta, { once: true });
 
     void audio.play().catch(() => {});
+
+    gaAudioEvent("audio_start", {
+      audio_url: t.url,
+      episode_title: t.title,
+      episode_id: t.episodeId,
+      show_title: t.showTitle,
+      show_slug: t.showSlug,
+    });
   }, []);
 
   const togglePlay = useCallback(() => {
@@ -221,15 +295,44 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
   const seekFraction = useCallback((f: number) => {
     const a = audioRef.current;
     if (!a?.duration || !isFinite(a.duration)) return;
+    lastSeekFrom.current = a.currentTime;
     a.currentTime = Math.min(a.duration, Math.max(0, f * a.duration));
+    const t = currentRef.current;
+    if (t) {
+      gaAudioEvent("audio_seek", {
+        audio_url: t.url,
+        episode_title: t.title,
+        episode_id: t.episodeId,
+        show_title: t.showTitle,
+        show_slug: t.showSlug,
+        from_sec: lastSeekFrom.current,
+        to_sec: a.currentTime,
+        method: "scrub",
+      });
+    }
   }, []);
 
   const skip = useCallback((deltaSec: number) => {
     const a = audioRef.current;
     if (!a) return;
+    const from = a.currentTime;
     const d = a.duration;
     const maxT = d && isFinite(d) ? d : Infinity;
     a.currentTime = Math.max(0, Math.min(maxT, a.currentTime + deltaSec));
+    const t = currentRef.current;
+    if (t) {
+      gaAudioEvent("audio_seek", {
+        audio_url: t.url,
+        episode_title: t.title,
+        episode_id: t.episodeId,
+        show_title: t.showTitle,
+        show_slug: t.showSlug,
+        from_sec: from,
+        to_sec: a.currentTime,
+        method: "skip",
+        delta_sec: deltaSec,
+      });
+    }
   }, []);
 
   const setSleepTimerMinutes = useCallback(
