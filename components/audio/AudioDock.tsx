@@ -23,8 +23,8 @@ export function AudioDock() {
   const frac = p.duration > 0 && isFinite(p.duration) ? Math.min(1, p.currentTime / p.duration) : 0;
 
   const onSeek = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const v = parseFloat(e.target.value) / 100;
+    (e: React.SyntheticEvent<HTMLInputElement>) => {
+      const v = parseFloat(e.currentTarget.value) / 100;
       p.seekFraction(v);
     },
     [p],
@@ -49,20 +49,40 @@ export function AudioDock() {
   const art = t.artwork;
 
   return (
-    <div className={`audio-dock${p.dockExpanded ? " audio-dock--expanded" : ""}`} role="region" aria-label="Now playing">
-      <div className="audio-dock__progress-line" aria-hidden>
-        <div className="audio-dock__progress-fill" style={{ width: `${frac * 100}%` }} />
+    <div className="audio-dock" role="region" aria-label="Now playing">
+      {/* Single thin scrubber — same on mobile and desktop (no extra expand panel). */}
+      <div className="audio-dock__timeline">
+        <span className="audio-dock__tmini" aria-hidden>
+          {fmtTime(p.currentTime)}
+        </span>
+        <div className="audio-dock__scrub-wrap">
+          <div className="audio-dock__scrub-line" aria-hidden>
+            <div className="audio-dock__scrub-fill" style={{ width: `${frac * 100}%` }} />
+          </div>
+          <input
+            type="range"
+            className="audio-dock__scrub-input"
+            min={0}
+            max={100}
+            step={0.1}
+            value={frac * 100}
+            onChange={onSeek}
+            onInput={onSeek}
+            aria-label="Playback position"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(frac * 100)}
+            aria-valuetext={`${fmtTime(p.currentTime)} of ${fmtTime(p.duration)}`}
+          />
+        </div>
+        <span className="audio-dock__tmini" aria-hidden>
+          {fmtTime(p.duration)}
+        </span>
       </div>
 
       <div className="audio-dock__shell">
         <div className="audio-dock__row">
-          <button
-            type="button"
-            className="audio-dock__expand-hit"
-            onClick={() => p.setDockExpanded(!p.dockExpanded)}
-            aria-expanded={p.dockExpanded}
-            aria-label={p.dockExpanded ? "Collapse player" : "Expand player"}
-          >
+          <div className="audio-dock__now">
             {art ? (
               <span className="audio-dock__art">
                 <Image src={art} alt="" width={48} height={48} className="audio-dock__art-img" sizes="48px" />
@@ -78,7 +98,7 @@ export function AudioDock() {
               <span className="audio-dock__episode-title">{t.title}</span>
               {t.showTitle ? <span className="audio-dock__show-title">{t.showTitle}</span> : null}
             </span>
-          </button>
+          </div>
 
           <div className="audio-dock__transport">
             <button type="button" className="audio-dock__skip" onClick={() => p.skip(-10)} aria-label="Back 10 seconds">
@@ -163,55 +183,8 @@ export function AudioDock() {
                 </div>
               ) : null}
             </div>
-
-            <button
-              type="button"
-              className="audio-dock__chev"
-              onClick={() => p.setDockExpanded(!p.dockExpanded)}
-              aria-label={p.dockExpanded ? "Collapse" : "Expand"}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                {p.dockExpanded ? <path d="M6 15l6-6 6 6" /> : <path d="M18 9l-6 6-6-6" />}
-              </svg>
-            </button>
           </div>
         </div>
-
-        {p.dockExpanded ? (
-          <div className="audio-dock__expanded">
-            <div className="audio-dock__seek-row">
-              <span className="audio-dock__time">{fmtTime(p.currentTime)}</span>
-              <input
-                type="range"
-                className="audio-dock__seek"
-                min={0}
-                max={100}
-                step={0.1}
-                value={frac * 100}
-                onChange={onSeek}
-                aria-label="Seek"
-              />
-              <span className="audio-dock__time">{fmtTime(p.duration)}</span>
-            </div>
-            <div className="audio-dock__vol audio-dock__vol--wide">
-              <span className="audio-dock__vol-icon" aria-hidden>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
-                </svg>
-              </span>
-              <input
-                type="range"
-                className="audio-dock__vol-range audio-dock__vol-range--wide"
-                min={0}
-                max={100}
-                value={Math.round(p.volume * 100)}
-                onChange={(e) => p.setVolume(parseInt(e.target.value, 10) / 100)}
-                aria-label="Volume"
-              />
-              <span className="audio-dock__vol-num">{Math.round(p.volume * 100)}%</span>
-            </div>
-          </div>
-        ) : null}
       </div>
     </div>
   );

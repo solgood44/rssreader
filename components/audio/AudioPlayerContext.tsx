@@ -30,8 +30,6 @@ type Ctx = {
   currentTime: number;
   duration: number;
   volume: number;
-  dockExpanded: boolean;
-  setDockExpanded: (v: boolean) => void;
   loadAndPlay: (t: TrackMeta) => void;
   togglePlay: () => void;
   pause: () => void;
@@ -77,7 +75,6 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolumeState] = useState(1);
-  const [dockExpanded, setDockExpanded] = useState(false);
   const [sleepMode, setSleepMode] = useState<SleepMode>("off");
   const [sleepEndAt, setSleepEndAt] = useState<number | null>(null);
   const [sleepLabel, setSleepLabel] = useState("");
@@ -270,8 +267,6 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       currentTime,
       duration,
       volume,
-      dockExpanded,
-      setDockExpanded,
       loadAndPlay,
       togglePlay,
       pause,
@@ -291,7 +286,6 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       currentTime,
       duration,
       volume,
-      dockExpanded,
       loadAndPlay,
       togglePlay,
       pause,
