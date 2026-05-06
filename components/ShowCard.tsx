@@ -9,7 +9,13 @@ export function ShowCard({ show }: { show: ShowRecord }) {
       <Link href={`/shows/${show.slug}`} className="card__link">
         {cover ? (
           <div className="card__media">
-            <OptimizedCover src={cover} alt="" size={280} />
+            <OptimizedCover
+              src={cover}
+              alt=""
+              width={400}
+              height={400}
+              sizes="(max-width: 480px) 42vw, 280px"
+            />
           </div>
         ) : (
           <div className="card__media card__media--placeholder" aria-hidden />

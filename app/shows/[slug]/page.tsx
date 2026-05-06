@@ -50,7 +50,15 @@ export default async function ShowPage({ params, searchParams }: Props) {
       <header className="show-hero">
         {cover ? (
           <div className="show-hero__cover">
-            <OptimizedCover src={cover} alt={show.data.title} size={320} priority />
+            <OptimizedCover
+              src={cover}
+              alt={show.data.title}
+              width={800}
+              height={800}
+              sizes="(max-width: 720px) 100vw, 320px"
+              responsive
+              priority
+            />
           </div>
         ) : null}
         <div>

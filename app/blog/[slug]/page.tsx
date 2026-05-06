@@ -41,14 +41,17 @@ export default async function BlogPostPage({ params }: Props) {
         ) : null}
       </header>
       {hero ? (
-        <div className="episode-page__cover">
+        <figure className="blog-hero">
           <OptimizedCover
             src={hero}
             alt={post.data.header?.hero_image_alt || ""}
-            size={640}
+            width={1600}
+            height={1000}
+            sizes="(max-width: 1100px) 100vw, 1100px"
+            responsive
             priority
           />
-        </div>
+        </figure>
       ) : null}
       <Markdown source={post.body} />
     </article>

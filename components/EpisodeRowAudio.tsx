@@ -158,7 +158,16 @@ export function EpisodeRowAudio({ ep, coverFallback }: { ep: RssEpisode; coverFa
 
         {thumb ? (
           <div className="episode-list__thumb" aria-hidden>
-            <Image src={thumb} alt="" width={72} height={72} sizes="72px" quality={65} className="episode-list__thumb-img" />
+            <Image
+              src={thumb}
+              alt=""
+              width={72}
+              height={72}
+              sizes="72px"
+              quality={65}
+              className="episode-list__thumb-img"
+              style={{ objectFit: "contain" }}
+            />
           </div>
         ) : (
           <div className="episode-list__thumb episode-list__thumb--empty" aria-hidden />

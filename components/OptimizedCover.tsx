@@ -3,27 +3,50 @@ import Image from "next/image";
 type Props = {
   src: string;
   alt: string;
-  /** Square card thumb — keeps decoded weight small vs full RSS art. */
-  size?: number;
+  /** Intrinsic dimensions for the optimizer (aspect ratio hint). */
+  width: number;
+  height: number;
+  sizes?: string;
   className?: string;
   priority?: boolean;
+  /** Default contain so full artwork stays visible (no cropping). */
+  objectFit?: "contain" | "cover";
+  /**
+   * When true: width 100% of parent, height auto — use for blog heroes and show headers
+   * so landscape/portrait art is never clipped.
+   */
+  responsive?: boolean;
 };
 
 /**
- * Wrapper around next/image with conservative dimensions so we never blast
- * full 1400px artwork across list grids (CPU + bandwidth).
+ * next/image wrapper. Prefer `objectFit="contain"` + `responsive` for heroes;
+ * square cards get a fixed box from parent CSS + contain.
  */
-export function OptimizedCover({ src, alt, size = 320, className, priority }: Props) {
+export function OptimizedCover({
+  src,
+  alt,
+  width,
+  height,
+  sizes = "(max-width: 1100px) 90vw, 400px",
+  className,
+  priority,
+  objectFit = "contain",
+  responsive = false,
+}: Props) {
   return (
     <Image
       src={src}
       alt={alt}
-      width={size}
-      height={size}
-      sizes={`${Math.min(size * 2, 640)}px`}
-      quality={70}
+      width={width}
+      height={height}
+      sizes={sizes}
+      quality={75}
       className={className}
       priority={priority}
+      style={{
+        objectFit,
+        ...(responsive ? { width: "100%", height: "auto", maxHeight: "min(72vh, 560px)" } : {}),
+      }}
     />
   );
 }
