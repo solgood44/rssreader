@@ -89,14 +89,6 @@ export function getBlogPost(slug: string): BlogRecord | null {
   return { slug, data: data as BlogFrontmatter, body: content.trim() };
 }
 
-export function getHomepageMarkdown(): { body: string } | null {
-  const file = contentPath("pages", "home.md");
-  if (!fs.existsSync(file)) return null;
-  const raw = fs.readFileSync(file, "utf8");
-  const { content } = matter(raw);
-  return { body: content.trim() };
-}
-
 export function getAllCategories(): { slug: string; data: CategoryFrontmatter; body: string }[] {
   const dir = contentPath("categories");
   return readMdDir(dir).map(({ slug, raw }) => {

@@ -1,15 +1,13 @@
 import Link from "next/link";
-import { getAllShows, getHomepageMarkdown } from "@/lib/content";
+import { getAllShows } from "@/lib/content";
 import { getDailyFeaturedShows } from "@/lib/daily-shows";
 import { showsToListEntries } from "@/lib/show-search";
-import { Markdown } from "@/components/Markdown";
 import { ShowCard } from "@/components/ShowCard";
 
-/** Homepage: intro + daily row + sample grid (capped for weight). */
+/** Homepage: daily row + sample grid (capped for weight). */
 const HOME_SHOW_LIMIT = 18;
 
 export default function HomePage() {
-  const home = getHomepageMarkdown();
   const allShows = getAllShows();
   const dailyFeatured = showsToListEntries(getDailyFeaturedShows());
   const featuredSlugs = new Set(dailyFeatured.map((s) => s.slug));
@@ -23,16 +21,6 @@ export default function HomePage() {
     <div>
       <header className="hero">
         <h1 className="hero__title">Home</h1>
-        {home ? (
-          <div className="hero__lede">
-            <Markdown source={home.body} />
-          </div>
-        ) : (
-          <p className="hero__lede">Welcome to Sol Good Media.</p>
-        )}
-        <p className="hero__cta">
-          <Link href="/shows">Browse full directory →</Link>
-        </p>
       </header>
 
       {dailyFeatured.length > 0 ? (
