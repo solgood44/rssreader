@@ -1400,7 +1400,8 @@ html[data-theme="light"] .shows-search-suggest__btn:hover {
 }
 
 .audio-dock__art,
-.audio-dock__art--placeholder {
+.audio-dock__art--placeholder,
+a.audio-dock__art-link {
   width: 48px;
   height: 48px;
   border-radius: 10px;
@@ -1412,6 +1413,19 @@ html[data-theme="light"] .shows-search-suggest__btn:hover {
   align-items: center;
   justify-content: center;
   color: var(--muted);
+}
+a.audio-dock__art-link {
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+a.audio-dock__art-link:hover {
+  border-color: var(--player-green);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--player-green) 45%, transparent);
+}
+a.audio-dock__art-link:focus-visible {
+  outline: 2px solid var(--player-green);
+  outline-offset: 2px;
 }
 .audio-dock__art-img {
   object-fit: cover;
