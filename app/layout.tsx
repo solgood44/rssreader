@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { AudioDock } from "@/components/audio/AudioDock";
 import { AudioPlayerProvider } from "@/components/audio/AudioPlayerContext";
 import { AppChrome } from "@/components/AppChrome";
-import { getAllCategories } from "@/lib/content";
+import { getAllCategories, getAllShows } from "@/lib/content";
+import { showsToListEntries } from "@/lib/show-search";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ function navCategories() {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const categories = navCategories();
+  const showEntries = showsToListEntries(getAllShows());
 
   return (
     <html lang="en">
@@ -37,7 +39,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <AudioPlayerProvider>
-          <AppChrome categories={categories}>{children}</AppChrome>
+          <AppChrome categories={categories} showEntries={showEntries}>
+            {children}
+          </AppChrome>
           <AudioDock />
         </AudioPlayerProvider>
       </body>
