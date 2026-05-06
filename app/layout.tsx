@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { AudioDock } from "@/components/audio/AudioDock";
 import { AudioPlayerProvider } from "@/components/audio/AudioPlayerContext";
-import { SiteChrome } from "@/components/SiteChrome";
+import { AppChrome } from "@/components/AppChrome";
+import { getAllCategories } from "@/lib/content";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,7 +13,18 @@ export const metadata: Metadata = {
   description: "Podcast network and audio library",
 };
 
+function navCategories() {
+  return getAllCategories()
+    .map((c) => ({
+      slug: c.slug,
+      title: c.data.title || c.slug,
+    }))
+    .sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: "base" }));
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const categories = navCategories();
+
   return (
     <html lang="en">
       <head>
@@ -25,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <AudioPlayerProvider>
-          <SiteChrome>{children}</SiteChrome>
+          <AppChrome categories={categories}>{children}</AppChrome>
           <AudioDock />
         </AudioPlayerProvider>
       </body>
