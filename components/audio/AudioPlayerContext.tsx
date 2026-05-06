@@ -12,7 +12,6 @@ import {
 import { getListenRecord, saveListenRecord } from "@/lib/listen-progress-storage";
 import { gaAudioEvent } from "@/lib/analytics";
 
-const VOLUME_KEY = "rssreader_volume_v1";
 const SAVE_PROGRESS_MS = 2000;
 
 export type TrackMeta = {
@@ -31,13 +30,11 @@ type Ctx = {
   isPlaying: boolean;
   currentTime: number;
   duration: number;
-  volume: number;
   loadAndPlay: (t: TrackMeta) => void;
   togglePlay: () => void;
   pause: () => void;
   seekFraction: (f: number) => void;
   skip: (deltaSec: number) => void;
-  setVolume: (v: number) => void;
   sleepMode: SleepMode;
   sleepEndAt: number | null;
   sleepLabel: string;
@@ -79,7 +76,6 @@ function formatSleepLeft(endAt: number): string {
 export function AudioPlayerProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const currentRef = useRef<TrackMeta | null>(null);
-  const volumeRef = useRef(1);
   const lastProgressSave = useRef(0);
   const sleepModeRef = useRef<SleepMode>("off");
   const lastSeekFrom = useRef<number | null>(null);
@@ -89,44 +85,12 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolumeState] = useState(1);
   const [sleepMode, setSleepMode] = useState<SleepMode>("off");
   const [sleepEndAt, setSleepEndAt] = useState<number | null>(null);
   const [sleepLabel, setSleepLabel] = useState("");
 
   currentRef.current = current;
-  volumeRef.current = volume;
   sleepModeRef.current = sleepMode;
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(VOLUME_KEY);
-      if (raw == null) return;
-      const v = parseFloat(raw);
-      if (v >= 0 && v <= 1) {
-        setVolumeState(v);
-        volumeRef.current = v;
-      }
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
-  useEffect(() => {
-    const a = audioRef.current;
-    if (a) a.volume = volume;
-    try {
-      localStorage.setItem(VOLUME_KEY, String(volume));
-    } catch {
-      /* ignore */
-    }
-  }, [volume]);
-
-  const setVolume = useCallback((v: number) => {
-    const n = Math.min(1, Math.max(0, v));
-    setVolumeState(n);
-    volumeRef.current = n;
-  }, []);
 
   const clearSleepTimer = useCallback(() => {
     setSleepMode("off");
@@ -135,13 +99,28 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     setSleepLabel("");
   }, []);
 
+  const persistListenProgress = useCallback((url: string, progress: number, completed: boolean) => {
+    const t = currentRef.current;
+    const meta =
+      t && t.url === url
+        ? {
+            title: t.title,
+            showTitle: t.showTitle,
+            showSlug: t.showSlug,
+            artwork: t.artwork,
+            episodeId: t.episodeId,
+          }
+        : undefined;
+    saveListenRecord(url, progress, completed, meta);
+  }, []);
+
   const flushProgress = useCallback(() => {
     const a = audioRef.current;
     const url = currentRef.current?.url;
     if (!a || !url || !a.duration || !isFinite(a.duration)) return;
     const frac = Math.min(1, a.currentTime / a.duration);
-    saveListenRecord(url, frac >= 0.97 ? 1 : frac, frac >= 0.97);
-  }, []);
+    persistListenProgress(url, frac >= 0.97 ? 1 : frac, frac >= 0.97);
+  }, [persistListenProgress]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -186,7 +165,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       if (now - lastProgressSave.current >= SAVE_PROGRESS_MS) {
         lastProgressSave.current = now;
         const frac = Math.min(1, audio.currentTime / d);
-        saveListenRecord(url, frac >= 0.97 ? 1 : frac, frac >= 0.97);
+        persistListenProgress(url, frac >= 0.97 ? 1 : frac, frac >= 0.97);
       }
 
       // Milestone analytics (fire once per track at 25/50/75/90%).
@@ -222,7 +201,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     const onEnded = () => {
       setIsPlaying(false);
       const url = currentRef.current?.url;
-      if (url) saveListenRecord(url, 1, true);
+      if (url) persistListenProgress(url, 1, true);
       const t = currentRef.current;
       if (t) {
         gaAudioEvent("audio_complete", {
@@ -250,7 +229,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       audio.removeEventListener("loadedmetadata", onLoadedMeta);
       audio.removeEventListener("ended", onEnded);
     };
-  }, [flushProgress, clearSleepTimer]);
+  }, [flushProgress, clearSleepTimer, persistListenProgress]);
 
   const loadAndPlay = useCallback((t: TrackMeta) => {
     const audio = audioRef.current;
@@ -258,7 +237,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     setCurrent(t);
     currentRef.current = t;
     milestonesRef.current.set(t.url, new Set());
-    audio.volume = volumeRef.current;
+    audio.volume = 1;
     audio.src = t.url;
 
     const rec = getListenRecord(t.url);
@@ -461,13 +440,11 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       isPlaying,
       currentTime,
       duration,
-      volume,
       loadAndPlay,
       togglePlay,
       pause,
       seekFraction,
       skip,
-      setVolume,
       sleepMode,
       sleepEndAt,
       sleepLabel,
@@ -480,13 +457,11 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       isPlaying,
       currentTime,
       duration,
-      volume,
       loadAndPlay,
       togglePlay,
       pause,
       seekFraction,
       skip,
-      setVolume,
       sleepMode,
       sleepEndAt,
       sleepLabel,

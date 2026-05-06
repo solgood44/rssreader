@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense, useCallback, useEffect, useId, useState } from "react";
 import type { ShowListEntry } from "@/lib/show-search";
 import { HeaderSearch, HeaderSearchFallback } from "./HeaderSearch";
+import { NavRecentlyListened } from "./NavRecentlyListened";
 import { SiteFooter } from "./SiteFooter";
 
 export type NavCategory = { slug: string; title: string };
@@ -97,20 +98,23 @@ export function AppChrome({ categories, showEntries, children }: Props) {
             </svg>
           </button>
         </div>
-        <nav className="nav-drawer__list" aria-label="Site">
-          <Link href="/" className="nav-drawer__link" onClick={close}>
-            Home
-          </Link>
-          <Link href="/blog" className="nav-drawer__link" onClick={close}>
-            Blog
-          </Link>
-          <div className="nav-drawer__rule" aria-hidden />
-          {categories.map((c) => (
-            <Link key={c.slug} href={`/category/${c.slug}`} className="nav-drawer__link" onClick={close}>
-              {c.title}
+        <div className="nav-drawer__scroll">
+          <nav className="nav-drawer__list" aria-label="Site">
+            <Link href="/" className="nav-drawer__link" onClick={close}>
+              Home
             </Link>
-          ))}
-        </nav>
+            <Link href="/blog" className="nav-drawer__link" onClick={close}>
+              Blog
+            </Link>
+            <div className="nav-drawer__rule" aria-hidden />
+            {categories.map((c) => (
+              <Link key={c.slug} href={`/category/${c.slug}`} className="nav-drawer__link" onClick={close}>
+                {c.title}
+              </Link>
+            ))}
+          </nav>
+          <NavRecentlyListened onPick={close} />
+        </div>
         <div className="nav-drawer__footer">
           <Link href="/category" className="nav-drawer__all" onClick={close}>
             All categories

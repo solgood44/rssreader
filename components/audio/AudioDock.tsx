@@ -55,6 +55,9 @@ export function AudioDock() {
         <span className="audio-dock__tmini" aria-hidden>
           {fmtTime(p.currentTime)}
         </span>
+        <span className="audio-dock__timeline-label" aria-hidden>
+          Position
+        </span>
         <div className="audio-dock__scrub-wrap">
           <div className="audio-dock__scrub-line" aria-hidden>
             <div className="audio-dock__scrub-fill" style={{ width: `${frac * 100}%` }} />
@@ -68,7 +71,7 @@ export function AudioDock() {
             value={frac * 100}
             onChange={onSeek}
             onInput={onSeek}
-            aria-label="Playback position"
+            aria-label="Seek playback position in episode"
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={Math.round(frac * 100)}
@@ -126,23 +129,6 @@ export function AudioDock() {
           </div>
 
           <div className="audio-dock__side-controls">
-            <div className="audio-dock__vol audio-dock__vol--compact">
-              <span className="audio-dock__vol-icon" aria-hidden>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
-                </svg>
-              </span>
-              <input
-                type="range"
-                className="audio-dock__vol-range"
-                min={0}
-                max={100}
-                value={Math.round(p.volume * 100)}
-                onChange={(e) => p.setVolume(parseInt(e.target.value, 10) / 100)}
-                aria-label="Volume"
-              />
-            </div>
-
             <div className="audio-dock__sleep-wrap" ref={sleepPopoverRef}>
               <button
                 type="button"
