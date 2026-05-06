@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense, useCallback, useEffect, useId, useState } from "react";
 import type { ShowListEntry } from "@/lib/show-search";
 import { HeaderSearch, HeaderSearchFallback } from "./HeaderSearch";
+import { SiteFooter } from "./SiteFooter";
 
 export type NavCategory = { slug: string; title: string };
 
@@ -118,9 +119,7 @@ export function AppChrome({ categories, showEntries, children }: Props) {
       </aside>
 
       <main className="site-main">{children}</main>
-      <footer className="site-footer">
-        <p>Podcast network and audio library. Audio streams from Spreaker; nothing is re-hosted here.</p>
-      </footer>
+      <SiteFooter />
     </>
   );
 }

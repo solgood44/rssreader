@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import {
   getAllCategories,
   getCategory,
@@ -7,7 +8,7 @@ import {
   showsForCategoryConfig,
 } from "@/lib/content";
 import { showsToListEntries } from "@/lib/show-search";
-import { ShowCard } from "@/components/ShowCard";
+import { CategoryShowsClient } from "@/components/CategoryShowsClient";
 import { Markdown } from "@/components/Markdown";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -55,11 +56,9 @@ export default async function CategoryPage({ params }: Props) {
           ? `${shows.length} shows in this collection.`
           : `${shows.length} shows tagged “${cat.data.category_match?.replace(/\*\*/g, "").trim() ?? ""}”.`}
       </p>
-      <div className="card-grid">
-        {shows.map((s) => (
-          <ShowCard key={s.slug} show={s} />
-        ))}
-      </div>
+      <Suspense fallback={<p className="section-sub">Loading shows…</p>}>
+        <CategoryShowsClient entries={shows} />
+      </Suspense>
     </div>
   );
 }
