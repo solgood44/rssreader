@@ -19,10 +19,6 @@ export default function HomePage() {
 
   return (
     <div>
-      <header className="hero">
-        <h1 className="hero__title">Home</h1>
-      </header>
-
       {dailyFeatured.length > 0 ? (
         <section className="home-daily" aria-labelledby="home-daily-heading">
           <h2 id="home-daily-heading" className="section-title">
