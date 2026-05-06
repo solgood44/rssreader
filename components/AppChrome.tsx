@@ -58,6 +58,10 @@ export function AppChrome({ categories, showEntries, children }: Props) {
               <span className="nav-hamburger__bar" aria-hidden />
               <span className="nav-hamburger__bar" aria-hidden />
             </button>
+            <nav className="site-header__rail" aria-label="Library">
+              <Link href="/recent">Recently listened</Link>
+              <Link href="/favorites">Favorites</Link>
+            </nav>
           </div>
           <div className="site-header__center">
             <Suspense fallback={<HeaderSearchFallback />}>
@@ -105,6 +109,9 @@ export function AppChrome({ categories, showEntries, children }: Props) {
           <nav className="nav-drawer__list" aria-label="Site">
             <Link href="/recent" className="nav-drawer__link" onClick={close}>
               Recently listened
+            </Link>
+            <Link href="/favorites" className="nav-drawer__link" onClick={close}>
+              Favorites
             </Link>
             <Link href="/" className="nav-drawer__link" onClick={close}>
               Home

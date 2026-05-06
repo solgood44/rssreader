@@ -6,6 +6,7 @@ import { detectNumberedEpisodes, resolveEpisodeSort } from "@/lib/episode-sort";
 import { EpisodeList } from "@/components/EpisodeList";
 import { Markdown } from "@/components/Markdown";
 import { OptimizedCover } from "@/components/OptimizedCover";
+import { ShowFavoriteHeart } from "@/components/ShowFavoriteHeart";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -55,20 +56,31 @@ export default async function ShowPage({ params, searchParams }: Props) {
       </p>
 
       <header className="show-hero">
-        {cover ? (
-          <div className="show-hero__cover">
-            <OptimizedCover
-              src={cover}
-              alt={show.data.title}
-              width={640}
-              height={640}
-              sizes="(max-width: 720px) 100vw, 320px"
-              responsive
-              priority
-              quality={78}
-            />
-          </div>
-        ) : null}
+        <div className="show-hero__media">
+          <ShowFavoriteHeart slug={show.slug} showTitle={show.data.title} />
+          {cover ? (
+            <div className="show-hero__cover">
+              <OptimizedCover
+                src={cover}
+                alt={show.data.title}
+                width={640}
+                height={640}
+                sizes="(max-width: 720px) 100vw, 320px"
+                responsive
+                priority
+                quality={78}
+              />
+            </div>
+          ) : (
+            <div className="show-hero__cover show-hero__cover--empty" aria-hidden>
+              <span className="show-hero__cover-empty-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25">
+                  <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
+                </svg>
+              </span>
+            </div>
+          )}
+        </div>
         <div>
           <h1 className="show-hero__title">{show.data.title}</h1>
           {show.data.description ? <p className="show-hero__desc">{show.data.description}</p> : null}

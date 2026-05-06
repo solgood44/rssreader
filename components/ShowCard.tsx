@@ -1,25 +1,54 @@
+"use client";
+
 import Link from "next/link";
 import type { ShowListEntry } from "@/lib/show-search";
 import { OptimizedCover } from "./OptimizedCover";
+import { ShowFavoriteHeart } from "./ShowFavoriteHeart";
 
-export function ShowCard({ show }: { show: ShowListEntry }) {
+const DEFAULT_CARD_SIZES = "(max-width: 639px) 48vw, (max-width: 1100px) 28vw, 300px";
+
+/** Slightly lower than hero art — smaller files for dense grids; next/image still picks width from `sizes`. */
+const CARD_COVER_QUALITY = 72;
+
+export function ShowCard({
+  show,
+  imageSizes,
+  imageQuality = CARD_COVER_QUALITY,
+}: {
+  show: ShowListEntry;
+  imageSizes?: string;
+  /** next/image quality; default tuned for list grids */
+  imageQuality?: number;
+}) {
   const cover = show.cover_image;
+  const href = `/shows/${show.slug}`;
+
   return (
     <article className="card">
-      <Link href={`/shows/${show.slug}`} className="card__link">
-        {cover ? (
-          <div className="card__media">
+      <div className="card__media">
+        <Link
+          href={href}
+          className="card__cover-link"
+          tabIndex={-1}
+          aria-hidden="true"
+          draggable={false}
+        >
+          {cover ? (
             <OptimizedCover
               src={cover}
               alt=""
               width={300}
               height={300}
-              sizes="(max-width: 639px) 48vw, (max-width: 1100px) 28vw, 300px"
+              sizes={imageSizes ?? DEFAULT_CARD_SIZES}
+              quality={imageQuality}
             />
-          </div>
-        ) : (
-          <div className="card__media card__media--placeholder" aria-hidden />
-        )}
+          ) : (
+            <div className="card__media--placeholder card__media--placeholder--fill" aria-hidden />
+          )}
+        </Link>
+        <ShowFavoriteHeart slug={show.slug} showTitle={show.title} />
+      </div>
+      <Link href={href} className="card__link">
         <div className="card__body">
           <h2 className="card__title">{show.title}</h2>
           {show.description ? <p className="card__excerpt">{show.description}</p> : null}
