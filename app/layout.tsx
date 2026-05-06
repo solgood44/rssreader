@@ -12,8 +12,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Sol Good Media",
-    template: "%s | Sol Good Media",
+    default: "Podcast library",
+    template: "%s | Podcast library",
   },
   description: "Calm shows, stories, and sleep-friendly listening from Sol Good Media.",
 };
@@ -37,8 +37,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const showEntries = showsToListEntries(getAllShows());
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('sgm-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}`,
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link

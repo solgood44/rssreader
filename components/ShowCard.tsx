@@ -14,7 +14,7 @@ export function ShowCard({ show }: { show: ShowListEntry }) {
               alt=""
               width={400}
               height={400}
-              sizes="(max-width: 480px) 42vw, 280px"
+              sizes="(max-width: 639px) 46vw, 280px"
             />
           </div>
         ) : (

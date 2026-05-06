@@ -5,6 +5,7 @@ import { Suspense, useCallback, useEffect, useId, useState } from "react";
 import type { ShowListEntry } from "@/lib/show-search";
 import { HeaderSearch, HeaderSearchFallback } from "./HeaderSearch";
 import { SiteFooter } from "./SiteFooter";
+import { ThemeToggle } from "./ThemeToggle";
 
 export type NavCategory = { slug: string; title: string };
 
@@ -63,13 +64,16 @@ export function AppChrome({ categories, showEntries, children }: Props) {
               <HeaderSearch showEntries={showEntries} />
             </Suspense>
           </div>
-          <nav className="site-header__end site-nav" aria-label="Primary">
-            {topNav.map((n) => (
-              <Link key={n.href} href={n.href}>
-                {n.label}
-              </Link>
-            ))}
-          </nav>
+          <div className="site-header__end">
+            <ThemeToggle />
+            <nav className="site-nav" aria-label="Primary">
+              {topNav.map((n) => (
+                <Link key={n.href} href={n.href}>
+                  {n.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
         </div>
       </header>
 
