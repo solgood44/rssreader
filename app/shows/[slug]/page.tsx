@@ -87,7 +87,12 @@ export default async function ShowPage({ params, searchParams }: Props) {
       ) : rssError ? null : episodes.length === 0 ? (
         <p className="section-sub">No episodes found in the feed.</p>
       ) : (
-        <EpisodeList show={show} episodes={episodes} page={page} />
+        <EpisodeList
+          showSlug={show.slug}
+          coverFallback={show.data.cover_image}
+          episodes={episodes}
+          page={page}
+        />
       )}
     </div>
   );
