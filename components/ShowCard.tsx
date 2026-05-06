@@ -1,9 +1,9 @@
 import Link from "next/link";
-import type { ShowRecord } from "@/lib/content";
+import type { ShowListEntry } from "@/lib/show-search";
 import { OptimizedCover } from "./OptimizedCover";
 
-export function ShowCard({ show }: { show: ShowRecord }) {
-  const cover = show.data.cover_image;
+export function ShowCard({ show }: { show: ShowListEntry }) {
+  const cover = show.cover_image;
   return (
     <article className="card">
       <Link href={`/shows/${show.slug}`} className="card__link">
@@ -21,8 +21,8 @@ export function ShowCard({ show }: { show: ShowRecord }) {
           <div className="card__media card__media--placeholder" aria-hidden />
         )}
         <div className="card__body">
-          <h2 className="card__title">{show.data.title}</h2>
-          {show.data.description ? <p className="card__excerpt">{show.data.description}</p> : null}
+          <h2 className="card__title">{show.title}</h2>
+          {show.description ? <p className="card__excerpt">{show.description}</p> : null}
         </div>
       </Link>
     </article>

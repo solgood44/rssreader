@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllCategories, getCategory, showsForCategory } from "@/lib/content";
+import { showsToListEntries } from "@/lib/show-search";
 import { ShowCard } from "@/components/ShowCard";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -21,7 +22,9 @@ export default async function CategoryPage({ params }: Props) {
   const cat = getCategory(slug);
   if (!cat || !cat.data.category_match) notFound();
 
-  const shows = showsForCategory(cat.data.category_match);
+  const shows = showsToListEntries(showsForCategory(cat.data.category_match)).sort((a, b) =>
+    a.title.localeCompare(b.title, undefined, { sensitivity: "base" }),
+  );
 
   return (
     <div>
