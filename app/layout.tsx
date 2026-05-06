@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { AudioDock } from "@/components/audio/AudioDock";
+import { AudioPlayerProvider } from "@/components/audio/AudioPlayerContext";
 import { SiteChrome } from "@/components/SiteChrome";
 import "./globals.css";
 
@@ -22,7 +24,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <SiteChrome>{children}</SiteChrome>
+        <AudioPlayerProvider>
+          <SiteChrome>{children}</SiteChrome>
+          <AudioDock />
+        </AudioPlayerProvider>
       </body>
     </html>
   );

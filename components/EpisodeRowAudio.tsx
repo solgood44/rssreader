@@ -1,19 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { RssEpisode } from "@/lib/rss";
-import { getListenRecord, saveListenRecord, type ListenRecord } from "@/lib/listen-progress-storage";
+import { getListenRecord, type ListenRecord } from "@/lib/listen-progress-storage";
+import { useAudioPlayer } from "@/components/audio/AudioPlayerContext";
 
 const RING_R = 20;
 const RING_C = 2 * Math.PI * RING_R;
-const SAVE_MS = 2000;
-
-function pauseOtherEpisodeAudios(current: HTMLAudioElement) {
-  document.querySelectorAll<HTMLAudioElement>("audio.episode-list__audio").forEach((el) => {
-    if (el !== current && !el.paused) el.pause();
-  });
-}
 
 function ProgressRingPlayButton({
   progress,
@@ -61,81 +55,51 @@ function ProgressRingPlayButton({
   );
 }
 
-export function EpisodeRowAudio({ ep, coverFallback }: { ep: RssEpisode; coverFallback?: string }) {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const lastSaveRef = useRef(0);
-  const restoredRef = useRef(false);
-  const [playing, setPlaying] = useState(false);
+type Props = {
+  ep: RssEpisode;
+  coverFallback?: string;
+  showTitle: string;
+  showSlug: string;
+};
+
+/**
+ * Play/pause routes through the global dock player so audio survives navigation.
+ */
+export function EpisodeRowAudio({ ep, coverFallback, showTitle, showSlug }: Props) {
+  const player = useAudioPlayer();
   const [stored, setStored] = useState<ListenRecord | null>(null);
-  /** Live fraction while element reports time; drives ring during playback. */
-  const [liveFrac, setLiveFrac] = useState<number | null>(null);
 
   const url = ep.audioUrl;
+  const thumb = ep.image || coverFallback;
 
   useEffect(() => {
     setStored(getListenRecord(url ?? undefined));
-    restoredRef.current = false;
   }, [url]);
 
-  /** Resume roughly where the listener left off (same device). */
-  useEffect(() => {
-    const a = audioRef.current;
-    if (!a || !url) return;
-    const rec = getListenRecord(url);
-    if (!rec || rec.completed || rec.progress < 0.04 || rec.progress > 0.96) return;
-    const onMeta = () => {
-      if (!a.duration || !isFinite(a.duration) || restoredRef.current) return;
-      restoredRef.current = true;
-      a.currentTime = rec.progress * a.duration;
-    };
-    a.addEventListener("loadedmetadata", onMeta);
-    return () => a.removeEventListener("loadedmetadata", onMeta);
-  }, [url]);
+  const isActive = !!(url && player.current?.url === url);
+  const playing = isActive && player.isPlaying;
 
-  const flushProgress = useCallback(() => {
-    const a = audioRef.current;
-    if (!url || !a || !a.duration || !isFinite(a.duration)) return;
-    const frac = Math.min(1, a.currentTime / a.duration);
-    const done = frac >= 0.97;
-    saveListenRecord(url, done ? 1 : frac, done);
-    setStored(getListenRecord(url));
-    setLiveFrac(null);
-  }, [url]);
-
-  const onTimeUpdate = useCallback(() => {
-    const a = audioRef.current;
-    if (!a?.duration || !isFinite(a.duration)) return;
-    const frac = Math.min(1, a.currentTime / a.duration);
-    setLiveFrac(frac);
-    const now = Date.now();
-    if (now - lastSaveRef.current >= SAVE_MS) {
-      lastSaveRef.current = now;
-      const done = frac >= 0.97;
-      if (url) saveListenRecord(url, done ? 1 : frac, done);
-    }
-  }, [url]);
-
-  const displayProgress = stored?.completed
-    ? 1
-    : playing && liveFrac !== null
-      ? liveFrac
-      : (stored?.progress ?? 0);
+  const displayProgress =
+    stored?.completed ? 1
+    : isActive && player.duration > 0 && isFinite(player.duration) ? player.currentTime / player.duration
+    : (stored?.progress ?? 0);
 
   const completed = !!stored?.completed;
 
-  const togglePlay = useCallback(() => {
-    const a = audioRef.current;
-    if (!a || !url) return;
-    pauseOtherEpisodeAudios(a);
-    if (!a.paused) {
-      a.pause();
-      flushProgress();
+  const onRingClick = useCallback(() => {
+    if (!url) return;
+    if (isActive) {
+      player.togglePlay();
       return;
     }
-    void a.play().catch(() => {});
-  }, [url, flushProgress]);
-
-  const thumb = ep.image || coverFallback;
+    player.loadAndPlay({
+      url,
+      title: ep.title,
+      artwork: thumb,
+      showTitle,
+      showSlug,
+    });
+  }, [url, isActive, player, ep.title, thumb, showTitle, showSlug]);
 
   return (
     <li className={`episode-list__item${completed ? " episode-list__item--completed" : ""}`}>
@@ -145,7 +109,7 @@ export function EpisodeRowAudio({ ep, coverFallback }: { ep: RssEpisode; coverFa
             progress={displayProgress}
             completed={completed}
             playing={playing}
-            onClick={togglePlay}
+            onClick={onRingClick}
             label={playing ? `Pause: ${ep.title}` : `Play: ${ep.title}`}
           />
         ) : (
@@ -182,33 +146,6 @@ export function EpisodeRowAudio({ ep, coverFallback }: { ep: RssEpisode; coverFa
           ) : null}
         </div>
       </div>
-
-      {url ? (
-        <audio
-          ref={audioRef}
-          className="audio-player episode-list__audio"
-          src={url}
-          controls
-          preload="metadata"
-          onPlay={(e) => {
-            pauseOtherEpisodeAudios(e.currentTarget);
-            setPlaying(true);
-          }}
-          onPause={() => {
-            setPlaying(false);
-            flushProgress();
-          }}
-          onTimeUpdate={onTimeUpdate}
-          onEnded={() => {
-            setPlaying(false);
-            if (url) saveListenRecord(url, 1, true);
-            setStored(getListenRecord(url));
-            setLiveFrac(null);
-          }}
-        />
-      ) : (
-        <p className="episode-list__no-audio">No stream in feed</p>
-      )}
     </li>
   );
 }

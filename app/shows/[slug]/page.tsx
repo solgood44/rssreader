@@ -87,7 +87,9 @@ export default async function ShowPage({ params, searchParams }: Props) {
       </header>
 
       <h2 className="section-title">Episodes</h2>
-      <p className="section-sub">Loaded from the public RSS feed (cached on the server).</p>
+      <p className="section-sub">
+        Loaded from the public RSS feed (cached on the server). Playback uses the bottom player so you can browse the site while listening.
+      </p>
 
       {rssError ? <p className="section-sub">RSS: {rssError}</p> : null}
       {!show.data.rss_url ? (
@@ -97,6 +99,7 @@ export default async function ShowPage({ params, searchParams }: Props) {
       ) : (
         <EpisodeList
           showSlug={show.slug}
+          showTitle={show.data.title}
           coverFallback={show.data.cover_image}
           episodes={episodes}
           page={page}

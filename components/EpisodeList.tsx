@@ -8,15 +8,16 @@ const EPISODES_PAGE_SIZE = 40;
 
 type Props = {
   showSlug: string;
+  showTitle: string;
   coverFallback?: string;
   episodes: RssEpisode[];
   page?: number;
 };
 
 /**
- * Each episode has its own player, timeline, and ring progress (listen state in localStorage).
+ * Episode rows control the global bottom player (persists across pages).
  */
-export function EpisodeList({ showSlug, coverFallback, episodes, page = 1 }: Props) {
+export function EpisodeList({ showSlug, showTitle, coverFallback, episodes, page = 1 }: Props) {
   const sorted = [...episodes].sort((a, b) => {
     const ta = a.pubDate ? Date.parse(a.pubDate) : 0;
     const tb = b.pubDate ? Date.parse(b.pubDate) : 0;
@@ -30,7 +31,13 @@ export function EpisodeList({ showSlug, coverFallback, episodes, page = 1 }: Pro
     <>
       <ol className="episode-list episode-list--stacked">
         {slice.map((ep) => (
-          <EpisodeRowAudio key={ep.id} ep={ep} coverFallback={coverFallback} />
+          <EpisodeRowAudio
+            key={ep.id}
+            ep={ep}
+            coverFallback={coverFallback}
+            showTitle={showTitle}
+            showSlug={showSlug}
+          />
         ))}
       </ol>
       {hasMore ? (
