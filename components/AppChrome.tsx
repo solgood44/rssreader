@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useId, useState } from "react";
 import type { ShowListEntry } from "@/lib/show-search";
-import { suggestionShows } from "@/lib/show-search";
+import { HeaderSearch, HeaderSearchFallback } from "./HeaderSearch";
 
 export type NavCategory = { slug: string; title: string };
 
@@ -17,21 +16,10 @@ type Props = {
 };
 
 export function AppChrome({ categories, showEntries, children }: Props) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const titleId = useId();
-  const searchId = useId();
-  const searchWrapRef = useRef<HTMLDivElement>(null);
-
-  const [searchInput, setSearchInput] = useState("");
-  const [suggestOpen, setSuggestOpen] = useState(false);
 
   const close = useCallback(() => setOpen(false), []);
-
-  const suggestions = useMemo(
-    () => (searchInput.trim() ? suggestionShows(showEntries, searchInput, 8) : []),
-    [showEntries, searchInput],
-  );
 
   useEffect(() => {
     document.body.classList.toggle("nav-drawer-open", open);
@@ -51,43 +39,11 @@ export function AppChrome({ categories, showEntries, children }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, close]);
 
-  useEffect(() => {
-    if (!suggestOpen) return;
-    const closeSuggest = (e: MouseEvent) => {
-      if (searchWrapRef.current?.contains(e.target as Node)) return;
-      setSuggestOpen(false);
-    };
-    const id = window.setTimeout(() => document.addEventListener("click", closeSuggest), 0);
-    return () => {
-      clearTimeout(id);
-      document.removeEventListener("click", closeSuggest);
-    };
-  }, [suggestOpen]);
-
-  const goSearch = useCallback(() => {
-    const q = searchInput.trim();
-    setSuggestOpen(false);
-    if (!q) {
-      router.push("/shows");
-      return;
-    }
-    router.push(`/shows?q=${encodeURIComponent(q)}`);
-  }, [router, searchInput]);
-
-  const onPickShow = useCallback(
-    (slug: string) => {
-      setSuggestOpen(false);
-      setSearchInput("");
-      router.push(`/shows/${slug}`);
-    },
-    [router],
-  );
-
   return (
     <>
       <header className="site-header">
         <div className="site-header__inner">
-          <div className="site-header__left">
+          <div className="site-header__start">
             <button
               type="button"
               className={`nav-hamburger${open ? " nav-hamburger--open" : ""}`}
@@ -100,56 +56,13 @@ export function AppChrome({ categories, showEntries, children }: Props) {
               <span className="nav-hamburger__bar" aria-hidden />
               <span className="nav-hamburger__bar" aria-hidden />
             </button>
-            <div className="site-header__search-wrap" ref={searchWrapRef}>
-              <label className="visually-hidden" htmlFor={searchId}>
-                Search shows
-              </label>
-              <input
-                id={searchId}
-                type="search"
-                className="site-header__search-input"
-                placeholder="Search shows…"
-                autoComplete="off"
-                value={searchInput}
-                onChange={(e) => {
-                  setSearchInput(e.target.value);
-                  setSuggestOpen(true);
-                }}
-                onFocus={() => setSuggestOpen(true)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    goSearch();
-                  }
-                  if (e.key === "Escape") setSuggestOpen(false);
-                }}
-                aria-expanded={suggestOpen && suggestions.length > 0}
-                aria-controls="site-header-search-suggest"
-                aria-autocomplete="list"
-              />
-              {suggestOpen && suggestions.length > 0 ? (
-                <ul id="site-header-search-suggest" className="site-header__search-suggest" role="listbox">
-                  {suggestions.map((s) => (
-                    <li key={s.slug} role="option">
-                      <button
-                        type="button"
-                        className="shows-search-suggest__btn"
-                        onClick={() => onPickShow(s.slug)}
-                      >
-                        <span className="shows-search-suggest__title">{s.title}</span>
-                        {s.categories.length > 0 ? (
-                          <span className="shows-search-suggest__meta">
-                            {s.categories.slice(0, 3).join(" · ")}
-                          </span>
-                        ) : null}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
           </div>
-          <nav className="site-nav" aria-label="Primary">
+          <div className="site-header__center">
+            <Suspense fallback={<HeaderSearchFallback />}>
+              <HeaderSearch showEntries={showEntries} />
+            </Suspense>
+          </div>
+          <nav className="site-header__end site-nav" aria-label="Primary">
             {topNav.map((n) => (
               <Link key={n.href} href={n.href}>
                 {n.label}

@@ -120,9 +120,47 @@ export function blogCanonicalSlug(post: BlogRecord): string {
   return post.slug;
 }
 
+export function normalizeRssUrl(url: string): string {
+  const u = url.trim().replace(/\/+$/, "");
+  try {
+    const parsed = new URL(u);
+    return `${parsed.protocol}//${parsed.host}${parsed.pathname}`.replace(/\/+$/, "");
+  } catch {
+    return u;
+  }
+}
+
 export function showsForCategory(match: string): ShowRecord[] {
   const m = match.toLowerCase();
   return getAllShows().filter((s) =>
     (s.data.taxonomy?.category ?? []).some((c) => c.toLowerCase() === m),
   );
+}
+
+/** Resolve shows for a category page: optional RSS allowlist overrides taxonomy match. */
+export function showsForCategoryConfig(data: CategoryFrontmatter): ShowRecord[] {
+  const allow = data.category_rss_allowlist;
+  if (allow && allow.length > 0) {
+    const set = new Set(allow.map(normalizeRssUrl));
+    return getAllShows().filter(
+      (s) => s.data.rss_url && set.has(normalizeRssUrl(s.data.rss_url)),
+    );
+  }
+  if (data.category_match) return showsForCategory(data.category_match);
+  return [];
+}
+
+/** Preserve editorial order from an RSS allowlist (e.g. Daily category). */
+export function orderShowsByRssAllowlist(shows: ShowRecord[], allow: string[]): ShowRecord[] {
+  const keys = allow.map(normalizeRssUrl);
+  const map = new Map<string, ShowRecord>();
+  for (const s of shows) {
+    if (s.data.rss_url) map.set(normalizeRssUrl(s.data.rss_url), s);
+  }
+  const out: ShowRecord[] = [];
+  for (const k of keys) {
+    const s = map.get(k);
+    if (s) out.push(s);
+  }
+  return out;
 }

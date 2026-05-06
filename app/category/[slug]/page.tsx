@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAllCategories, getCategory, showsForCategory } from "@/lib/content";
+import {
+  getAllCategories,
+  getCategory,
+  orderShowsByRssAllowlist,
+  showsForCategoryConfig,
+} from "@/lib/content";
 import { showsToListEntries } from "@/lib/show-search";
 import { ShowCard } from "@/components/ShowCard";
 import { Markdown } from "@/components/Markdown";
@@ -21,11 +26,18 @@ export async function generateMetadata({ params }: Props) {
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
   const cat = getCategory(slug);
-  if (!cat || !cat.data.category_match) notFound();
+  if (!cat || (!cat.data.category_match && !(cat.data.category_rss_allowlist?.length ?? 0))) notFound();
 
-  const shows = showsToListEntries(showsForCategory(cat.data.category_match)).sort((a, b) =>
-    a.title.localeCompare(b.title, undefined, { sensitivity: "base" }),
-  );
+  const allow = cat.data.category_rss_allowlist;
+  let records = showsForCategoryConfig(cat.data);
+  if (allow && allow.length > 0) {
+    records = orderShowsByRssAllowlist(records, allow);
+  } else {
+    records = [...records].sort((a, b) =>
+      a.data.title.localeCompare(b.data.title, undefined, { sensitivity: "base" }),
+    );
+  }
+  const shows = showsToListEntries(records);
 
   return (
     <div>
@@ -39,7 +51,9 @@ export default async function CategoryPage({ params }: Props) {
         </div>
       ) : null}
       <p className="section-sub">
-        {shows.length} shows tagged “{cat.data.category_match.replace(/\*\*/g, "").trim()}”.
+        {allow && allow.length > 0
+          ? `${shows.length} shows in this collection.`
+          : `${shows.length} shows tagged “${cat.data.category_match?.replace(/\*\*/g, "").trim() ?? ""}”.`}
       </p>
       <div className="card-grid">
         {shows.map((s) => (

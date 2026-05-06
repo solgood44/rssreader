@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { filterShows, sortEntries, suggestionShows, type ShowListEntry, type SortMode } from "@/lib/show-search";
+import { useCallback, useMemo } from "react";
+import { filterShows, sortEntries, type ShowListEntry, type SortMode } from "@/lib/show-search";
 import { ShowCard } from "./ShowCard";
 
 const PAGE_SIZE = 48;
-const DEBOUNCE_MS = 320;
 
 function parseSort(s: string | null): SortMode {
   if (s === "za" || s === "random") return s;
@@ -18,7 +17,6 @@ export function ShowsDirectoryClient({ entries }: { entries: ShowListEntry[] }) 
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const searchWrapRef = useRef<HTMLDivElement>(null);
 
   const sort = parseSort(searchParams.get("sort"));
   const q = (searchParams.get("q") ?? "").trim();
@@ -27,39 +25,13 @@ export function ShowsDirectoryClient({ entries }: { entries: ShowListEntry[] }) 
   const randomSeed =
     seedStr != null && seedStr !== "" ? parseInt(seedStr, 10) || 1337 : 1337;
 
-  const [input, setInput] = useState(q);
-  const [suggestOpen, setSuggestOpen] = useState(false);
-
-  useEffect(() => {
-    setInput(q);
-  }, [q]);
-
-  useEffect(() => {
-    const t = window.setTimeout(() => {
-      if (input.trim() === q) return;
-      const p = new URLSearchParams(searchParams.toString());
-      const next = input.trim();
-      if (!next) p.delete("q");
-      else p.set("q", next);
-      p.delete("page");
-      const qs = p.toString();
-      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-    }, DEBOUNCE_MS);
-    return () => clearTimeout(t);
-  }, [input, q, pathname, router, searchParams]);
-
-  useEffect(() => {
-    if (!suggestOpen) return;
-    const close = (e: MouseEvent) => {
-      if (searchWrapRef.current?.contains(e.target as Node)) return;
-      setSuggestOpen(false);
-    };
-    const id = window.setTimeout(() => document.addEventListener("click", close), 0);
-    return () => {
-      clearTimeout(id);
-      document.removeEventListener("click", close);
-    };
-  }, [suggestOpen]);
+  const clearSearchHref = useMemo(() => {
+    const p = new URLSearchParams(searchParams.toString());
+    p.delete("q");
+    p.delete("page");
+    const s = p.toString();
+    return s ? `${pathname}?${s}` : pathname;
+  }, [pathname, searchParams]);
 
   const filtered = useMemo(() => filterShows(entries, q), [entries, q]);
   const sorted = useMemo(
@@ -70,11 +42,6 @@ export function ShowsDirectoryClient({ entries }: { entries: ShowListEntry[] }) 
   const safePage = Math.min(page, totalPages);
   const start = (safePage - 1) * PAGE_SIZE;
   const slice = sorted.slice(start, start + PAGE_SIZE);
-
-  const suggestions = useMemo(
-    () => (input.trim().length > 0 ? suggestionShows(entries, input, 10) : []),
-    [entries, input],
-  );
 
   const pushParams = useCallback(
     (mutate: (p: URLSearchParams) => void) => {
@@ -107,11 +74,6 @@ export function ShowsDirectoryClient({ entries }: { entries: ShowListEntry[] }) 
     });
   };
 
-  const onPickSuggestion = (slug: string) => {
-    setSuggestOpen(false);
-    router.push(`/shows/${slug}`);
-  };
-
   return (
     <div>
       <h1 className="hero__title">All shows</h1>
@@ -121,6 +83,15 @@ export function ShowsDirectoryClient({ entries }: { entries: ShowListEntry[] }) 
           : `${sorted.length} matching · ${entries.length} total`}
         {totalPages > 1 ? ` · page ${safePage} of ${totalPages}` : null}
       </p>
+
+      {q ? (
+        <p className="section-sub shows-filter-hint">
+          Filtering by “{q}”.{" "}
+          <Link href={clearSearchHref} className="shows-filter-hint__clear">
+            Clear search
+          </Link>
+        </p>
+      ) : null}
 
       <div className="shows-toolbar">
         <div className="shows-toolbar__sort" role="group" aria-label="Sort shows">
@@ -147,54 +118,10 @@ export function ShowsDirectoryClient({ entries }: { entries: ShowListEntry[] }) 
             Random
           </button>
         </div>
-
-        <div className="shows-search-wrap" ref={searchWrapRef}>
-          <label className="visually-hidden" htmlFor="shows-search-input">
-            Search podcasts by title, description, or category
-          </label>
-          <input
-            id="shows-search-input"
-            type="search"
-            className="shows-search-input"
-            placeholder="Search shows…"
-            autoComplete="off"
-            value={input}
-            onChange={(e) => {
-              setInput(e.target.value);
-              setSuggestOpen(true);
-            }}
-            onFocus={() => setSuggestOpen(true)}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") setSuggestOpen(false);
-              if (e.key === "Enter" && suggestions[0]) {
-                e.preventDefault();
-                onPickSuggestion(suggestions[0].slug);
-              }
-            }}
-            role="combobox"
-            aria-expanded={suggestOpen && suggestions.length > 0}
-            aria-controls="shows-search-suggest"
-            aria-autocomplete="list"
-          />
-          {suggestOpen && suggestions.length > 0 ? (
-            <ul id="shows-search-suggest" className="shows-search-suggest" role="listbox">
-              {suggestions.map((s) => (
-                <li key={s.slug} role="option">
-                  <button type="button" className="shows-search-suggest__btn" onClick={() => onPickSuggestion(s.slug)}>
-                    <span className="shows-search-suggest__title">{s.title}</span>
-                    {s.categories.length ? (
-                      <span className="shows-search-suggest__meta">{s.categories.slice(0, 3).join(" · ")}</span>
-                    ) : null}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
       </div>
 
       {slice.length === 0 ? (
-        <p className="section-sub">No shows match “{q}”. Try another search or clear the filter.</p>
+        <p className="section-sub">No shows match “{q}”. Try another search in the header or clear the filter.</p>
       ) : (
         <div className="card-grid">
           {slice.map((s) => (

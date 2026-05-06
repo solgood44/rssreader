@@ -15,12 +15,17 @@ export const metadata: Metadata = {
 };
 
 function navCategories() {
-  return getAllCategories()
-    .map((c) => ({
-      slug: c.slug,
-      title: c.data.title || c.slug,
-    }))
-    .sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: "base" }));
+  const rows = getAllCategories().map((c) => ({
+    slug: c.slug,
+    title: c.data.title || c.slug,
+  }));
+  rows.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: "base" }));
+  const dailyIdx = rows.findIndex((c) => c.slug === "daily");
+  if (dailyIdx > 0) {
+    const [daily] = rows.splice(dailyIdx, 1);
+    rows.unshift(daily);
+  }
+  return rows;
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
