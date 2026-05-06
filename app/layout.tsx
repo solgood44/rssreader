@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     default: "Sol Good Media",
     template: "%s | Sol Good Media",
   },
-  description: "Podcast network and audio library",
+  description: "Calm shows, stories, and sleep-friendly listening from Sol Good Media.",
 };
 
 function navCategories() {

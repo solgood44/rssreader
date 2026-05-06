@@ -99,6 +99,9 @@ export function AppChrome({ categories, showEntries, children }: Props) {
         </div>
         <div className="nav-drawer__scroll">
           <nav className="nav-drawer__list" aria-label="Site">
+            <Link href="/recent" className="nav-drawer__link" onClick={close}>
+              Recently listened
+            </Link>
             <Link href="/" className="nav-drawer__link" onClick={close}>
               Home
             </Link>

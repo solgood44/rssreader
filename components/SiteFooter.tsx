@@ -7,9 +7,5 @@ export function SiteFooter() {
   if (pathname === "/category" || pathname.startsWith("/category/")) {
     return null;
   }
-  return (
-    <footer className="site-footer">
-      <p>Podcast network and audio library. Audio streams from Spreaker; nothing is re-hosted here.</p>
-    </footer>
-  );
+  return <footer className="site-footer" />;
 }
