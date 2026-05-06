@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import type { RssEpisode } from "@/lib/rss";
 import { getListenRecord, type ListenRecord } from "@/lib/listen-progress-storage";
@@ -119,23 +118,6 @@ export function EpisodeRowAudio({ ep, coverFallback, showTitle, showSlug }: Prop
               <circle className="ep-ring-btn__track" cx="26" cy="26" r={RING_R} fill="none" strokeWidth="2.5" />
             </svg>
           </div>
-        )}
-
-        {thumb ? (
-          <div className="episode-list__thumb" aria-hidden>
-            <Image
-              src={thumb}
-              alt=""
-              width={72}
-              height={72}
-              sizes="72px"
-              quality={65}
-              className="episode-list__thumb-img"
-              style={{ objectFit: "contain" }}
-            />
-          </div>
-        ) : (
-          <div className="episode-list__thumb episode-list__thumb--empty" aria-hidden />
         )}
 
         <div className="episode-list__text">

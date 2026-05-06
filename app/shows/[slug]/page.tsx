@@ -94,7 +94,6 @@ export default async function ShowPage({ params, searchParams }: Props) {
       </header>
 
       <h2 className="section-title">Episodes</h2>
-      <p className="section-sub">Use the bottom player to listen while you browse.</p>
 
       {rssError ? <p className="section-sub">Could not load feed: {rssError}</p> : null}
       {!show.data.rss_url ? (
