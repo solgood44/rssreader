@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getAllCategories, getCategory, showsForCategory } from "@/lib/content";
 import { showsToListEntries } from "@/lib/show-search";
 import { ShowCard } from "@/components/ShowCard";
+import { Markdown } from "@/components/Markdown";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -32,8 +33,14 @@ export default async function CategoryPage({ params }: Props) {
         <Link href="/category">← Categories</Link>
       </p>
       <h1 className="hero__title">{cat.data.title}</h1>
-      {cat.body ? <p className="hero__lede">{cat.body}</p> : null}
-      <p className="section-sub">{shows.length} shows tagged “{cat.data.category_match}”.</p>
+      {cat.body ? (
+        <div className="hero__lede hero__lede--md">
+          <Markdown source={cat.body} />
+        </div>
+      ) : null}
+      <p className="section-sub">
+        {shows.length} shows tagged “{cat.data.category_match.replace(/\*\*/g, "").trim()}”.
+      </p>
       <div className="card-grid">
         {shows.map((s) => (
           <ShowCard key={s.slug} show={s} />

@@ -50,7 +50,7 @@ export function AppChrome({ categories, children }: Props) {
               onClick={() => setOpen((o) => !o)}
               aria-expanded={open}
               aria-controls="site-nav-drawer"
-              aria-label={open ? "Close categories menu" : "Open categories menu"}
+              aria-label={open ? "Close menu" : "Open topics menu"}
             >
               <span className="nav-hamburger__bar" aria-hidden />
               <span className="nav-hamburger__bar" aria-hidden />
@@ -86,7 +86,7 @@ export function AppChrome({ categories, children }: Props) {
       >
         <div className="nav-drawer__head">
           <h2 id={titleId} className="nav-drawer__title">
-            Categories
+            Topics
           </h2>
           <button type="button" className="nav-drawer__close" onClick={close} aria-label="Close menu">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -94,27 +94,16 @@ export function AppChrome({ categories, children }: Props) {
             </svg>
           </button>
         </div>
-        <p className="nav-drawer__lede">Browse shows by topic — same tags as the original site.</p>
-        <nav className="nav-drawer__list" aria-label="Categories">
+        <nav className="nav-drawer__list" aria-label="Browse by topic">
           {categories.map((c) => (
             <Link key={c.slug} href={`/category/${c.slug}`} className="nav-drawer__link" onClick={close}>
-              <span className="nav-drawer__link-icon" aria-hidden>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M4 6h16M4 12h16M4 18h10" strokeLinecap="round" />
-                </svg>
-              </span>
-              <span className="nav-drawer__link-text">{c.title}</span>
-              <span className="nav-drawer__chev" aria-hidden>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
+              {c.title}
             </Link>
           ))}
         </nav>
         <div className="nav-drawer__footer">
           <Link href="/category" className="nav-drawer__all" onClick={close}>
-            View all categories →
+            All categories
           </Link>
         </div>
       </aside>

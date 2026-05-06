@@ -15,6 +15,8 @@ export type RssEpisode = {
   pubDate: string | null;
   /** Raw duration string if present (e.g. HH:MM:SS from itunes:duration). */
   duration: string | null;
+  /** iTunes episode number from feed, when present. */
+  itunesEpisode: number | null;
 };
 
 const RSS_CACHE_SECONDS = Number(process.env.RSS_REVALIDATE_SECONDS ?? 3600);
@@ -107,6 +109,9 @@ export function parseRssItems(xml: string): RssEpisode[] {
     const guid = innerText(tagContent(itemXml, "guid")) || link;
     const pubDate = tagContent(itemXml, "pubDate") || null;
     const duration = tagContent(itemXml, "itunes:duration") || null;
+    const itunesEpisodeRaw = innerText(tagContent(itemXml, "itunes:episode")).trim();
+    const itunesEpisodeParsed = itunesEpisodeRaw ? parseInt(itunesEpisodeRaw, 10) : NaN;
+    const itunesEpisode = Number.isFinite(itunesEpisodeParsed) ? itunesEpisodeParsed : null;
 
     const id = episodeIdFromRssItem(itemXml);
     let uniqueId = id;
@@ -126,6 +131,7 @@ export function parseRssItems(xml: string): RssEpisode[] {
       guid,
       pubDate,
       duration,
+      itunesEpisode,
     });
   }
 

@@ -52,6 +52,17 @@ export function useAudioPlayer() {
   return c;
 }
 
+function toAbsoluteArtworkUrl(src: string | undefined): string | undefined {
+  if (!src) return undefined;
+  if (typeof window === "undefined") return undefined;
+  const s = src.trim();
+  if (s.startsWith("https://")) return s;
+  if (s.startsWith("http://")) return s;
+  if (s.startsWith("//")) return `https:${s}`;
+  if (s.startsWith("/")) return `${window.location.origin}${s}`;
+  return `${window.location.origin}/${s}`;
+}
+
 function formatSleepLeft(endAt: number): string {
   const s = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
   const m = Math.floor(s / 60);
@@ -259,6 +270,87 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
   useEffect(() => {
     document.body.classList.toggle("has-audio-dock", !!current);
   }, [current]);
+
+  /** Lock screen / Control Center metadata (cover art needs absolute https URLs). */
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
+    if (!current) {
+      navigator.mediaSession.metadata = null;
+      return;
+    }
+    const absArt = toAbsoluteArtworkUrl(current.artwork);
+    const artwork = absArt ? [{ src: absArt, sizes: "512x512" }] : [];
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: current.title,
+      artist: current.showTitle || "Sol Good Media",
+      album: current.showTitle || undefined,
+      artwork,
+    });
+  }, [current]);
+
+  const lastReportedPos = useRef(0);
+  useEffect(() => {
+    lastReportedPos.current = -1;
+  }, [current?.url]);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
+    const ms = navigator.mediaSession;
+    if (!("setPositionState" in ms)) return;
+    if (!current || !duration || !isFinite(duration) || duration <= 0) {
+      return;
+    }
+    const pos = Math.min(duration, Math.max(0, currentTime));
+    if (isPlaying && Math.abs(pos - lastReportedPos.current) < 0.45) return;
+    lastReportedPos.current = pos;
+    try {
+      ms.setPositionState({
+        duration,
+        playbackRate: 1,
+        position: pos,
+      });
+    } catch {
+      /* iOS/Safari: invalid state */
+    }
+  }, [current, currentTime, duration, isPlaying]);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
+    const ms = navigator.mediaSession;
+    const audio = audioRef.current;
+    const play = () => {
+      void audio?.play().catch(() => {});
+    };
+    const pause = () => audio?.pause();
+    try {
+      ms.setActionHandler("play", play);
+      ms.setActionHandler("pause", pause);
+      ms.setActionHandler("seekbackward", () => {
+        const a = audioRef.current;
+        if (!a) return;
+        a.currentTime = Math.max(0, a.currentTime - 10);
+      });
+      ms.setActionHandler("seekforward", () => {
+        const a = audioRef.current;
+        if (!a) return;
+        const d = a.duration;
+        const maxT = d && isFinite(d) ? d : Infinity;
+        a.currentTime = Math.min(maxT, a.currentTime + 30);
+      });
+    } catch {
+      /* unsupported */
+    }
+    return () => {
+      try {
+        ms.setActionHandler("play", null);
+        ms.setActionHandler("pause", null);
+        ms.setActionHandler("seekbackward", null);
+        ms.setActionHandler("seekforward", null);
+      } catch {
+        /* ignore */
+      }
+    };
+  }, []);
 
   const value = useMemo(
     () => ({

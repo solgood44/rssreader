@@ -2,16 +2,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllShows, getShow } from "@/lib/content";
 import { fetchRssEpisodes } from "@/lib/rss";
+import { detectNumberedEpisodes, resolveEpisodeSort } from "@/lib/episode-sort";
 import { EpisodeList } from "@/components/EpisodeList";
 import { Markdown } from "@/components/Markdown";
 import { OptimizedCover } from "@/components/OptimizedCover";
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; sort?: string }>;
 };
 
-/** RSS is fetched on demand (cached via fetch revalidate) — avoid build-time fan-out to every feed. */
+/** RSS fetched on demand per show (not at build time). */
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -25,6 +26,7 @@ export default async function ShowPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const sp = await searchParams;
   const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
+  const sortParam = sp.sort;
 
   const show = getShow(slug);
   if (!show) notFound();
@@ -38,6 +40,11 @@ export default async function ShowPage({ params, searchParams }: Props) {
       rssError = e instanceof Error ? e.message : "Could not load RSS feed.";
     }
   }
+
+  const numberedDetected = detectNumberedEpisodes(episodes);
+  const episodeSort = resolveEpisodeSort(sortParam, episodes);
+  const sortQuery =
+    sortParam === "newest" || sortParam === "oldest" || sortParam === "episode" ? sortParam : undefined;
 
   const cover = show.data.cover_image;
 
@@ -87,11 +94,9 @@ export default async function ShowPage({ params, searchParams }: Props) {
       </header>
 
       <h2 className="section-title">Episodes</h2>
-      <p className="section-sub">
-        Loaded from the public RSS feed (cached on the server). Playback uses the bottom player so you can browse the site while listening.
-      </p>
+      <p className="section-sub">Use the bottom player to listen while you browse.</p>
 
-      {rssError ? <p className="section-sub">RSS: {rssError}</p> : null}
+      {rssError ? <p className="section-sub">Could not load feed: {rssError}</p> : null}
       {!show.data.rss_url ? (
         <p className="section-sub">No RSS URL configured for this show.</p>
       ) : rssError ? null : episodes.length === 0 ? (
@@ -102,6 +107,9 @@ export default async function ShowPage({ params, searchParams }: Props) {
           showTitle={show.data.title}
           coverFallback={show.data.cover_image}
           episodes={episodes}
+          sort={episodeSort}
+          sortQuery={sortQuery}
+          numberedDetected={numberedDetected}
           page={page}
         />
       )}
