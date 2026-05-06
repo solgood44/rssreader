@@ -52,6 +52,9 @@ export function AudioDock() {
   const showNavLabel = t.showTitle?.trim()
     ? `Open podcast: ${t.showTitle.trim()}`
     : "Open podcast page";
+  const titlesNavLabel = t.showTitle?.trim()
+    ? `Go to podcast: ${t.showTitle.trim()} (${t.title})`
+    : `Go to podcast page for ${t.title}`;
 
   const artInner = art ? (
     <OptimizedCover src={art} alt="" width={96} height={96} className="audio-dock__art-img" sizes="48px" />
@@ -114,10 +117,21 @@ export function AudioDock() {
                 {artInner}
               </span>
             )}
-            <span className="audio-dock__titles">
-              <span className="audio-dock__episode-title">{t.title}</span>
-              {t.showTitle ? <span className="audio-dock__show-title">{t.showTitle}</span> : null}
-            </span>
+            {showHref ? (
+              <Link
+                href={showHref}
+                className="audio-dock__titles audio-dock__titles-link"
+                aria-label={titlesNavLabel}
+              >
+                <span className="audio-dock__episode-title">{t.title}</span>
+                {t.showTitle ? <span className="audio-dock__show-title">{t.showTitle}</span> : null}
+              </Link>
+            ) : (
+              <span className="audio-dock__titles">
+                <span className="audio-dock__episode-title">{t.title}</span>
+                {t.showTitle ? <span className="audio-dock__show-title">{t.showTitle}</span> : null}
+              </span>
+            )}
           </div>
 
           <div className="audio-dock__transport">

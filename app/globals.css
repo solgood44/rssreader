@@ -1439,6 +1439,24 @@ a.audio-dock__art-link:focus-visible {
   flex-direction: column;
   gap: 0.1rem;
 }
+a.audio-dock__titles-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 6px;
+  outline-offset: 2px;
+  transition: opacity 0.15s ease;
+}
+a.audio-dock__titles-link:hover .audio-dock__episode-title {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+a.audio-dock__titles-link:hover .audio-dock__show-title {
+  color: var(--text);
+}
+a.audio-dock__titles-link:focus-visible {
+  outline: 2px solid var(--player-green);
+}
 .audio-dock__episode-title {
   font-weight: 600;
   font-size: 0.92rem;
