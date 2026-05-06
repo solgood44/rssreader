@@ -12,9 +12,9 @@ export function ShowCard({ show }: { show: ShowListEntry }) {
             <OptimizedCover
               src={cover}
               alt=""
-              width={400}
-              height={400}
-              sizes="(max-width: 639px) 46vw, 280px"
+              width={300}
+              height={300}
+              sizes="(max-width: 639px) 48vw, (max-width: 1100px) 28vw, 300px"
             />
           </div>
         ) : (

@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { OptimizedCover } from "@/components/OptimizedCover";
 import { useAudioPlayer } from "./AudioPlayerContext";
 
 function fmtTime(sec: number): string {
@@ -88,7 +88,7 @@ export function AudioDock() {
           <div className="audio-dock__now">
             {art ? (
               <span className="audio-dock__art">
-                <Image src={art} alt="" width={48} height={48} className="audio-dock__art-img" sizes="48px" />
+                <OptimizedCover src={art} alt="" width={96} height={96} className="audio-dock__art-img" sizes="48px" />
               </span>
             ) : (
               <span className="audio-dock__art audio-dock__art--placeholder" aria-hidden>

@@ -60,11 +60,12 @@ export default async function ShowPage({ params, searchParams }: Props) {
             <OptimizedCover
               src={cover}
               alt={show.data.title}
-              width={800}
-              height={800}
+              width={640}
+              height={640}
               sizes="(max-width: 720px) 100vw, 320px"
               responsive
               priority
+              quality={78}
             />
           </div>
         ) : null}

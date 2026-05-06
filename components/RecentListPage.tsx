@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { OptimizedCover } from "@/components/OptimizedCover";
 import { useCallback, useEffect, useState } from "react";
 import { useAudioPlayer } from "@/components/audio/AudioPlayerContext";
 import {
@@ -103,14 +103,13 @@ export function RecentListPage() {
                 >
                   {art ? (
                     <span className="recent-list__art">
-                      <Image
+                      <OptimizedCover
                         src={art}
                         alt=""
-                        width={56}
-                        height={56}
+                        width={112}
+                        height={112}
                         className="recent-list__art-img"
                         sizes="56px"
-                        unoptimized
                       />
                     </span>
                   ) : (

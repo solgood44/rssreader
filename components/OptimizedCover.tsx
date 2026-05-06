@@ -16,6 +16,8 @@ type Props = {
    * so landscape/portrait art is never clipped.
    */
   responsive?: boolean;
+  /** next/image quality 1–100; default 75. Use ~78 for hero art. */
+  quality?: number;
 };
 
 /**
@@ -32,6 +34,7 @@ export function OptimizedCover({
   priority,
   objectFit = "contain",
   responsive = false,
+  quality = 75,
 }: Props) {
   return (
     <Image
@@ -40,7 +43,7 @@ export function OptimizedCover({
       width={width}
       height={height}
       sizes={sizes}
-      quality={75}
+      quality={quality}
       className={className}
       priority={priority}
       style={{
