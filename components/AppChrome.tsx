@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Suspense, useCallback, useEffect, useId, useState } from "react";
 import type { ShowListEntry } from "@/lib/show-search";
 import { HeaderSearch, HeaderSearchFallback } from "./HeaderSearch";
-import { NavRecentlyListened } from "./NavRecentlyListened";
 import { SiteFooter } from "./SiteFooter";
 
 export type NavCategory = { slug: string; title: string };
@@ -113,7 +112,6 @@ export function AppChrome({ categories, showEntries, children }: Props) {
               </Link>
             ))}
           </nav>
-          <NavRecentlyListened onPick={close} />
         </div>
         <div className="nav-drawer__footer">
           <Link href="/category" className="nav-drawer__all" onClick={close}>
