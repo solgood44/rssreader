@@ -245,11 +245,12 @@ html[data-theme="light"] .nav-hamburger:hover {
   transform: translateY(-7px) rotate(-45deg);
 }
 
+/* Above .site-header (90) so mobile full-width search row can’t cover drawer links */
 .nav-drawer-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
-  z-index: 85;
+  z-index: 94;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.22s ease, visibility 0.22s ease;
@@ -266,7 +267,7 @@ html[data-theme="light"] .nav-hamburger:hover {
   left: 0;
   bottom: 0;
   width: min(300px, 88vw);
-  z-index: 86;
+  z-index: 95;
   background: var(--surface);
   border-right: 1px solid var(--border);
   box-shadow: 8px 0 40px rgba(0, 0, 0, 0.35);
