@@ -22,7 +22,28 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const show = getShow(slug);
   if (!show) return {};
-  return { title: show.data.title, description: show.data.description };
+  const description = show.data.description?.trim() || `Listen to ${show.data.title} in the Sol Good Media podcast library.`;
+  const images = show.data.cover_image
+    ? [{ url: show.data.cover_image, width: 640, height: 640, alt: show.data.title }]
+    : undefined;
+  return {
+    title: show.data.title,
+    description,
+    alternates: { canonical: `/shows/${slug}` },
+    openGraph: {
+      title: show.data.title,
+      description,
+      type: "website",
+      url: `/shows/${slug}`,
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: show.data.title,
+      description,
+      images: images?.map((i) => i.url),
+    },
+  };
 }
 
 export default async function ShowPage({ params, searchParams }: Props) {

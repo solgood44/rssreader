@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -17,11 +18,23 @@ export async function generateStaticParams() {
   return getAllCategories().map((c) => ({ slug: c.slug }));
 }
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const cat = getCategory(slug);
   if (!cat) return {};
-  return { title: cat.data.title };
+  const raw = cat.body.replace(/\s+/g, " ").trim();
+  const description =
+    raw.length > 0 ? raw.slice(0, 160) + (raw.length > 160 ? "…" : "") : `Podcasts in “${cat.data.title}” from Sol Good Media.`;
+  return {
+    title: cat.data.title,
+    description,
+    alternates: { canonical: `/category/${slug}` },
+    openGraph: {
+      title: cat.data.title,
+      description,
+      url: `/category/${slug}`,
+    },
+  };
 }
 
 export default async function CategoryPage({ params }: Props) {

@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllBlogPosts } from "@/lib/content";
 
-export const metadata = { title: "Blog" };
+export const metadata: Metadata = {
+  title: "Blog",
+  description: "News, listening tips, and articles from Sol Good Media.",
+  alternates: { canonical: "/blog" },
+};
 
 export default function BlogIndexPage() {
   const posts = getAllBlogPosts().sort((a, b) => {

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllShows } from "@/lib/content";
 import { getDailyFeaturedShows } from "@/lib/daily-shows";
@@ -6,6 +7,24 @@ import { ShowCard } from "@/components/ShowCard";
 
 /** Homepage: daily row + sample grid (capped for weight). */
 const HOME_SHOW_LIMIT = 18;
+
+const homeDescription =
+  "Calm shows, stories, and sleep-friendly listening from Sol Good Media. Browse daily episodes, categories, and a full podcast directory.";
+
+export const metadata: Metadata = {
+  title: {
+    absolute: "Podcast library",
+  },
+  description: homeDescription,
+  openGraph: {
+    title: "Podcast library — calm shows & stories",
+    description: homeDescription,
+    url: "/",
+  },
+  alternates: {
+    canonical: "/",
+  },
+};
 
 export default function HomePage() {
   const allShows = getAllShows();

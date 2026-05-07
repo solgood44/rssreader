@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getAllBlogPosts, getBlogPost } from "@/lib/content";
@@ -10,13 +11,31 @@ export async function generateStaticParams() {
   return getAllBlogPosts().map((p) => ({ slug: p.slug }));
 }
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = getBlogPost(slug);
   if (!post) return {};
+  const description = post.data.metadata?.description || post.data.summary;
+  const hero = post.data.header?.hero_image;
+  const images = hero ? [{ url: hero, alt: post.data.header?.hero_image_alt || post.data.title }] : undefined;
   return {
     title: post.data.title,
-    description: post.data.metadata?.description || post.data.summary,
+    description,
+    alternates: { canonical: `/blog/${slug}` },
+    openGraph: {
+      type: "article",
+      title: post.data.title,
+      description,
+      url: `/blog/${slug}`,
+      publishedTime: post.data.date,
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.data.title,
+      description,
+      images: images?.map((i) => i.url),
+    },
   };
 }
 

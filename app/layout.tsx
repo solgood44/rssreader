@@ -7,15 +7,53 @@ import { AppChrome } from "@/components/AppChrome";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { PageView } from "@/components/analytics/PageView";
 import { getAllCategories, getAllShows } from "@/lib/content";
+import { getSiteUrl } from "@/lib/site";
 import { showsToListEntries } from "@/lib/show-search";
 import "./globals.css";
 
+const siteUrl = getSiteUrl();
+const defaultDescription =
+  "Calm shows, stories, and sleep-friendly listening from Sol Good Media. Browse podcasts by category, save favorites, and listen in your browser.";
+
 export const metadata: Metadata = {
+  metadataBase: siteUrl,
   title: {
     default: "Podcast library",
     template: "%s | Podcast library",
   },
-  description: "Calm shows, stories, and sleep-friendly listening from Sol Good Media.",
+  description: defaultDescription,
+  applicationName: "Podcast library",
+  keywords: [
+    "podcast",
+    "podcasts",
+    "audiobooks",
+    "audio stories",
+    "sleep sounds",
+    "relaxation",
+    "Sol Good Media",
+    "free podcasts",
+  ],
+  authors: [{ name: "Sol Good Media" }],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: "Podcast library",
+    title: "Podcast library — Sol Good Media",
+    description: defaultDescription,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Podcast library — Sol Good Media",
+    description: defaultDescription,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icon.svg", type: "image/svg+xml" }],
+  },
 };
 
 function navCategories() {

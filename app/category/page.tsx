@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllCategories } from "@/lib/content";
 
-export const metadata = { title: "Categories" };
+export const metadata: Metadata = {
+  title: "Categories",
+  description: "Explore Sol Good Media podcasts by topic — health, stories, daily shows, sleep, and more.",
+  alternates: { canonical: "/category" },
+};
 
 export default function CategoriesIndexPage() {
   const cats = getAllCategories().sort((a, b) => a.data.title.localeCompare(b.data.title));
