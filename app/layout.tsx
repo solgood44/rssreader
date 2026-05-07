@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import { Suspense } from "react";
 import { AudioDock } from "@/components/audio/AudioDock";
 import { AudioPlayerProvider } from "@/components/audio/AudioPlayerContext";
@@ -97,6 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AudioDock />
         </AudioPlayerProvider>
         <SpeedInsights />
+        <Analytics />
         <GoogleAnalytics />
         <Suspense fallback={null}>
           <PageView />
