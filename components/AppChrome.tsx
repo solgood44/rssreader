@@ -134,6 +134,9 @@ export function AppChrome({ categories, showEntries, children }: Props) {
             <Link href="/author" className="nav-drawer__link" onClick={close}>
               Authors
             </Link>
+            <Link href="/radio-shows" className="nav-drawer__link" onClick={close}>
+              Radio shows
+            </Link>
             <div className="nav-drawer__rule" aria-hidden />
             {categories.map((c) => (
               <Link key={c.slug} href={`/category/${c.slug}`} className="nav-drawer__link" onClick={close}>
