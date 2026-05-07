@@ -22,6 +22,15 @@ export function ShowCard({
 }) {
   const cover = show.cover_image;
   const href = `/shows/${show.slug}`;
+  const normalize = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/[’']/g, "'")
+      .replace(/[\s\-—–]+/g, " ")
+      .replace(/[^\p{L}\p{N}\s']/gu, "")
+      .trim();
+  const desc = (show.description ?? "").trim();
+  const showDesc = desc && normalize(desc) !== normalize(show.title) ? desc : "";
 
   return (
     <article className="card">
@@ -51,7 +60,7 @@ export function ShowCard({
       <Link href={href} className="card__link">
         <div className="card__body">
           <h2 className="card__title">{show.title}</h2>
-          {show.description ? <p className="card__excerpt">{show.description}</p> : null}
+          {showDesc ? <p className="card__excerpt">{showDesc}</p> : null}
         </div>
       </Link>
     </article>

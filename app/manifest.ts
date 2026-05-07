@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Podcast library — Sol Good Media",
+    name: "Podcast library",
     short_name: "Podcasts",
-    description: "Calm shows, stories, and sleep-friendly listening from Sol Good Media.",
+    description: "Calm shows, stories, and sleep-friendly listening.",
     start_url: "/",
     display: "standalone",
     background_color: "#0c0f14",

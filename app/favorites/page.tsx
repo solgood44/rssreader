@@ -5,7 +5,7 @@ import { showsToListEntries } from "@/lib/show-search";
 
 export const metadata: Metadata = {
   title: "Favorites",
-  description: "Podcasts you’ve saved in this browser — quick access to your favorite Sol Good Media shows.",
+  description: "Podcasts you’ve saved in this browser — quick access to your favorites.",
   robots: { index: false, follow: true },
   alternates: { canonical: "/favorites" },
 };

@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next";
 import { getAllBlogPosts, getAllCategories, getAllShows } from "@/lib/content";
+import { getAllAuthors } from "@/lib/authors";
 import { getSiteUrl } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const { origin } = getSiteUrl();
   const now = new Date();
 
-  const staticPaths = ["", "/shows", "/blog", "/category", "/recent", "/favorites"] as const;
+  const staticPaths = ["", "/shows", "/blog", "/category", "/author", "/recent", "/favorites"] as const;
 
   const staticEntries: MetadataRoute.Sitemap = staticPaths.map((path) => ({
     url: `${origin}${path || "/"}`,
@@ -36,5 +37,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.65,
   }));
 
-  return [...staticEntries, ...shows, ...categories, ...posts];
+  const authors = getAllAuthors().map((a) => ({
+    url: `${origin}/author/${a.slug}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.68,
+  }));
+
+  return [...staticEntries, ...shows, ...categories, ...authors, ...posts];
 }

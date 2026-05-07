@@ -364,7 +364,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     const artwork = absArt ? [{ src: absArt, sizes: "512x512" }] : [];
     navigator.mediaSession.metadata = new MediaMetadata({
       title: current.title,
-      artist: current.showTitle || "Sol Good Media",
+      artist: current.showTitle || "Podcast library",
       album: current.showTitle || undefined,
       artwork,
     });

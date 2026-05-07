@@ -3,7 +3,7 @@ import { RecentListPage } from "@/components/RecentListPage";
 
 export const metadata: Metadata = {
   title: "Recently listened",
-  description: "Resume episodes and manage your in-browser listening history from Sol Good Media.",
+  description: "Resume episodes and manage your in-browser listening history.",
   robots: { index: false, follow: true },
   alternates: { canonical: "/recent" },
 };

@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!cat) return {};
   const raw = cat.body.replace(/\s+/g, " ").trim();
   const description =
-    raw.length > 0 ? raw.slice(0, 160) + (raw.length > 160 ? "…" : "") : `Podcasts in “${cat.data.title}” from Sol Good Media.`;
+    raw.length > 0 ? raw.slice(0, 160) + (raw.length > 160 ? "…" : "") : `Podcasts in “${cat.data.title}”.`;
   return {
     title: cat.data.title,
     description,

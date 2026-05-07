@@ -6,7 +6,7 @@ import { ShowsDirectoryClient } from "@/components/ShowsDirectoryClient";
 
 export const metadata: Metadata = {
   title: "All shows",
-  description: "Search and browse the full Sol Good Media podcast directory — stories, sleep audio, learning, and more.",
+  description: "Search and browse the full podcast directory — stories, sleep audio, learning, and more.",
   alternates: { canonical: "/shows" },
 };
 
@@ -23,8 +23,17 @@ export default function ShowsDirectoryPage() {
   const entries = showsToListEntries(getAllShows());
 
   return (
-    <Suspense fallback={<ShowsFallback />}>
-      <ShowsDirectoryClient entries={entries} />
-    </Suspense>
+    <>
+      <section className="hero">
+        <h1 className="hero__title">All shows</h1>
+        <p className="hero__lede">
+          Search by title in the header, or browse categories to find something that fits your mood.
+        </p>
+      </section>
+
+      <Suspense fallback={<ShowsFallback />}>
+        <ShowsDirectoryClient entries={entries} />
+      </Suspense>
+    </>
   );
 }

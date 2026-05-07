@@ -9,7 +9,7 @@ import { ShowCard } from "@/components/ShowCard";
 const HOME_SHOW_LIMIT = 18;
 
 const homeDescription =
-  "Calm shows, stories, and sleep-friendly listening from Sol Good Media. Browse daily episodes, categories, and a full podcast directory.";
+  "Calm shows, stories, and sleep-friendly listening. Browse daily episodes, categories, and a full podcast directory.";
 
 export const metadata: Metadata = {
   title: {
@@ -38,6 +38,22 @@ export default function HomePage() {
 
   return (
     <div>
+      <section className="hero">
+        <h1 className="hero__title">Find something good to listen to</h1>
+        <p className="hero__lede">{homeDescription}</p>
+        <div className="hero__cta hero-actions">
+          <Link href="/shows" className="hero-actions__primary">
+            Browse all shows
+          </Link>
+          <Link href="/category" className="hero-actions__secondary">
+            Explore categories
+          </Link>
+          <Link href="/recent" className="hero-actions__tertiary">
+            Continue listening
+          </Link>
+        </div>
+      </section>
+
       {dailyFeatured.length > 0 ? (
         <section className="home-daily" aria-labelledby="home-daily-heading">
           <h2 id="home-daily-heading" className="section-title">

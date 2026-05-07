@@ -58,12 +58,24 @@ export function AppChrome({ categories, showEntries, children }: Props) {
               <span className="nav-hamburger__bar" aria-hidden />
               <span className="nav-hamburger__bar" aria-hidden />
             </button>
+            <Link href="/" className="site-header__home-btn site-header__home-btn--mobile" aria-label="Home">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                <path d="M3 10.5L12 3l9 7.5" />
+                <path d="M5 9.9V21h14V9.9" />
+              </svg>
+            </Link>
             <nav className="site-header__rail" aria-label="Library">
               <Link href="/recent">Recently listened</Link>
               <Link href="/favorites">Favorites</Link>
             </nav>
           </div>
           <div className="site-header__center">
+            <Link href="/" className="site-header__home-btn site-header__home-btn--desktop" aria-label="Home">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                <path d="M3 10.5L12 3l9 7.5" />
+                <path d="M5 9.9V21h14V9.9" />
+              </svg>
+            </Link>
             <Suspense fallback={<HeaderSearchFallback />}>
               <HeaderSearch showEntries={showEntries} />
             </Suspense>
@@ -118,6 +130,9 @@ export function AppChrome({ categories, showEntries, children }: Props) {
             </Link>
             <Link href="/blog" className="nav-drawer__link" onClick={close}>
               Blog
+            </Link>
+            <Link href="/author" className="nav-drawer__link" onClick={close}>
+              Authors
             </Link>
             <div className="nav-drawer__rule" aria-hidden />
             {categories.map((c) => (

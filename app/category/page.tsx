@@ -4,7 +4,7 @@ import { getAllCategories } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Categories",
-  description: "Explore Sol Good Media podcasts by topic — health, stories, daily shows, sleep, and more.",
+  description: "Explore podcasts by topic — health, stories, daily shows, sleep, and more.",
   alternates: { canonical: "/category" },
 };
 

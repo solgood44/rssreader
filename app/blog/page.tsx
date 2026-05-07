@@ -4,7 +4,7 @@ import { getAllBlogPosts } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Blog",
-  description: "News, listening tips, and articles from Sol Good Media.",
+  description: "News, listening tips, and articles from the Podcast library.",
   alternates: { canonical: "/blog" },
 };
 

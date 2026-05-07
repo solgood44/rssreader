@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const show = getShow(slug);
   if (!show) return {};
-  const description = show.data.description?.trim() || `Listen to ${show.data.title} in the Sol Good Media podcast library.`;
+  const description = show.data.description?.trim() || `Listen to ${show.data.title} in the Podcast library.`;
   const images = show.data.cover_image
     ? [{ url: show.data.cover_image, width: 640, height: 640, alt: show.data.title }]
     : undefined;
@@ -55,6 +55,16 @@ export default async function ShowPage({ params, searchParams }: Props) {
   const allShows = getAllShows();
   const show = allShows.find((s) => s.slug === slug);
   if (!show) notFound();
+
+  const normalize = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/[’']/g, "'")
+      .replace(/[\s\-—–]+/g, " ")
+      .replace(/[^\p{L}\p{N}\s']/gu, "")
+      .trim();
+  const rawDesc = (show.data.description ?? "").trim();
+  const showDesc = rawDesc && normalize(rawDesc) !== normalize(show.data.title) ? rawDesc : "";
 
   let episodes: Awaited<ReturnType<typeof fetchRssEpisodes>> = [];
   let rssError: string | null = null;
@@ -110,7 +120,7 @@ export default async function ShowPage({ params, searchParams }: Props) {
         </div>
         <div>
           <h1 className="show-hero__title">{show.data.title}</h1>
-          {show.data.description ? <p className="show-hero__desc">{show.data.description}</p> : null}
+          {showDesc ? <p className="show-hero__desc">{showDesc}</p> : null}
           {show.body ? (
             <div className="hero__lede" style={{ marginTop: "1rem" }}>
               <Markdown source={show.body} />

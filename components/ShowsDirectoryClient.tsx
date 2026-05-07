@@ -76,7 +76,6 @@ export function ShowsDirectoryClient({ entries }: { entries: ShowListEntry[] }) 
 
   return (
     <div>
-      <h1 className="hero__title">All shows</h1>
       <p className="hero__lede">
         {sorted.length === entries.length
           ? `${entries.length} shows`
@@ -121,7 +120,12 @@ export function ShowsDirectoryClient({ entries }: { entries: ShowListEntry[] }) 
       </div>
 
       {slice.length === 0 ? (
-        <p className="section-sub">No shows match “{q}”. Try another search in the header or clear the filter.</p>
+        <div>
+          <p className="section-sub">No shows match “{q}”. Try another search in the header or clear the filter.</p>
+          <p className="section-sub">
+            <Link href={clearSearchHref}>Clear search</Link> or <Link href="/category">browse categories</Link>.
+          </p>
+        </div>
       ) : (
         <div className="card-grid">
           {slice.map((s) => (

@@ -14,7 +14,7 @@ import "./globals.css";
 
 const siteUrl = getSiteUrl();
 const defaultDescription =
-  "Calm shows, stories, and sleep-friendly listening from Sol Good Media. Browse podcasts by category, save favorites, and listen in your browser.";
+  "Calm shows, stories, and sleep-friendly listening. Browse podcasts by category, save favorites, and listen in your browser.";
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
@@ -31,20 +31,19 @@ export const metadata: Metadata = {
     "audio stories",
     "sleep sounds",
     "relaxation",
-    "Sol Good Media",
     "free podcasts",
   ],
-  authors: [{ name: "Sol Good Media" }],
+  authors: [{ name: "Podcast library" }],
   openGraph: {
     type: "website",
     locale: "en_US",
     siteName: "Podcast library",
-    title: "Podcast library — Sol Good Media",
+    title: "Podcast library",
     description: defaultDescription,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Podcast library — Sol Good Media",
+    title: "Podcast library",
     description: defaultDescription,
   },
   robots: {
