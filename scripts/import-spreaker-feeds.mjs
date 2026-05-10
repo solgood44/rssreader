@@ -116,8 +116,9 @@ function uniqueSlug(baseSlug) {
 }
 
 function writeShowMd({ slug, title, description, cover, rssUrl }) {
-  const descFront = truncate(description, 420);
-  const bodyExcerpt = truncate(description, 500);
+  /* Generous limits: YAML + body often duplicate; the site merges them and prefers the longer blurb. */
+  const descFront = truncate(description, 4000);
+  const bodyExcerpt = truncate(description, 6000);
   const coverLine = cover ? `cover_image: '${yamlEscape(cover)}'` : "";
   const lines = [
     "---",

@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import { getShow } from "@/lib/content";
 import { getShowListEntriesCached } from "@/lib/show-list-cache";
 import {
-  isMarkdownBodyRedundantWithDescription,
   recommendedShowEntries,
+  resolveShowPageTeaser,
   sanitizeShowDescription,
   shouldShowShowDescription,
 } from "@/lib/show-search";
@@ -29,8 +29,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const show = getShow(slug);
   if (!show) return {};
   const rawMetaDesc = sanitizeShowDescription((show.data.description ?? "").trim());
-  const description = shouldShowShowDescription(rawMetaDesc, show.data.title)
-    ? rawMetaDesc
+  const rawMetaBody = sanitizeShowDescription((show.body ?? "").trim());
+  const teaserMeta = resolveShowPageTeaser(rawMetaDesc, rawMetaBody, show.data.title);
+  const metaBlurb = (teaserMeta.markdownBody || teaserMeta.heroParagraph).trim();
+  const description = shouldShowShowDescription(metaBlurb, show.data.title)
+    ? metaBlurb
     : `Listen to ${show.data.title} in the Podcast library.`;
   const images = show.data.cover_image
     ? [{ url: show.data.cover_image, width: 640, height: 640, alt: show.data.title }]
@@ -65,15 +68,13 @@ export default async function ShowPage({ params, searchParams }: Props) {
   if (!show) notFound();
 
   const rawDesc = sanitizeShowDescription((show.data.description ?? "").trim());
-  const showDesc = shouldShowShowDescription(rawDesc, show.data.title) ? rawDesc : "";
-
   const rawBody = (show.body ?? "").trim();
   const bodySanitized = rawBody ? sanitizeShowDescription(rawBody) : "";
-  const hideMarkdownBody =
-    Boolean(showDesc) &&
-    Boolean(bodySanitized) &&
-    isMarkdownBodyRedundantWithDescription(bodySanitized, showDesc);
-  const markdownBody = bodySanitized && !hideMarkdownBody ? bodySanitized : "";
+  const { heroParagraph: showDesc, markdownBody } = resolveShowPageTeaser(
+    rawDesc,
+    bodySanitized,
+    show.data.title,
+  );
 
   let episodes: Awaited<ReturnType<typeof fetchRssEpisodes>> = [];
   let rssError: string | null = null;

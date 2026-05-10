@@ -34,6 +34,11 @@ function normalizeForShowTextCompare(s: string): string {
     .trim();
 }
 
+/** Strip trailing ellipsis from importer-truncated RSS blurbs (… or ...). */
+export function stripTrailingSummaryEllipsis(s: string): string {
+  return s.replace(/\s*(\.{3,}|…)\s*$/u, "").trim();
+}
+
 /**
  * Imported show files often repeat the RSS blurb in both YAML `description` and markdown body.
  * When both are the same intro (after promo strip), show the hero line only.
@@ -56,7 +61,60 @@ export function isMarkdownBodyRedundantWithDescription(
     const rest = nd.slice(nb.length).trim();
     if (rest.length <= Math.max(40, Math.floor(nb.length * 0.12))) return true;
   }
+  const dStrip = stripTrailingSummaryEllipsis(d);
+  const bStrip = stripTrailingSummaryEllipsis(b);
+  if (dStrip.length >= 32 && bStrip.startsWith(dStrip)) return true;
+  if (bStrip.length >= 32 && dStrip.startsWith(bStrip)) return true;
   return false;
+}
+
+export type ShowPageTeaser = { heroParagraph: string; markdownBody: string };
+
+/**
+ * Pick hero vs markdown body so we do not show the same truncated RSS blurb twice.
+ * When the body continues past a truncated YAML description, prefer the body only.
+ */
+export function resolveShowPageTeaser(
+  sanitizedDescription: string,
+  sanitizedBody: string,
+  title: string,
+): ShowPageTeaser {
+  const desc = sanitizedDescription.trim();
+  const body = sanitizedBody.trim();
+  const descPass = Boolean(desc) && shouldShowShowDescription(desc, title);
+  const bodyPass = Boolean(body) && shouldShowShowDescription(body, title);
+
+  if (!body) {
+    return { heroParagraph: descPass ? desc : "", markdownBody: "" };
+  }
+  if (!descPass) {
+    return { heroParagraph: "", markdownBody: bodyPass ? body : "" };
+  }
+
+  const redundant = isMarkdownBodyRedundantWithDescription(body, desc);
+  const descStrip = stripTrailingSummaryEllipsis(desc);
+  const bodyExtendsDesc =
+    body.startsWith(desc) ||
+    (descStrip.length >= 32 && body.startsWith(descStrip)) ||
+    (() => {
+      const nb = normalizeForShowTextCompare(body);
+      const nd = normalizeForShowTextCompare(descStrip);
+      const prefixLen = Math.min(200, nd.length);
+      return prefixLen >= 32 && nb.startsWith(nd.slice(0, prefixLen));
+    })();
+
+  if (bodyExtendsDesc && body.length > desc.length) {
+    if (bodyPass) return { heroParagraph: "", markdownBody: body };
+    return { heroParagraph: desc, markdownBody: "" };
+  }
+  if (redundant) {
+    if (body.length > desc.length && bodyPass) {
+      return { heroParagraph: "", markdownBody: body };
+    }
+    return { heroParagraph: desc, markdownBody: "" };
+  }
+
+  return { heroParagraph: desc, markdownBody: bodyPass ? body : "" };
 }
 
 /**
