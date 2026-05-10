@@ -7,9 +7,8 @@ import { AudioPlayerProvider } from "@/components/audio/AudioPlayerContext";
 import { AppChrome } from "@/components/AppChrome";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { PageView } from "@/components/analytics/PageView";
-import { getAllCategories, getAllShows } from "@/lib/content";
+import { getAllCategories } from "@/lib/content";
 import { getSiteUrl } from "@/lib/site";
-import { showsToListEntries } from "@/lib/show-search";
 import "./globals.css";
 
 const siteUrl = getSiteUrl();
@@ -72,7 +71,6 @@ function navCategories() {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const categories = navCategories();
-  const showEntries = showsToListEntries(getAllShows());
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -91,7 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <AudioPlayerProvider>
-          <AppChrome categories={categories} showEntries={showEntries}>
+          <AppChrome categories={categories}>
             {children}
           </AppChrome>
           <AudioDock />

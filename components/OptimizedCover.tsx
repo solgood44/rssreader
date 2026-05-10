@@ -18,6 +18,11 @@ type Props = {
   responsive?: boolean;
   /** next/image quality 1–100; default 75. Use ~78 for hero art. */
   quality?: number;
+  /**
+   * When true, skips Vercel Image Optimization (remote URL served as-is).
+   * Use on dense grids (show cards, dock) to limit transform cost at scale.
+   */
+  unoptimized?: boolean;
 };
 
 /**
@@ -35,6 +40,7 @@ export function OptimizedCover({
   objectFit = "contain",
   responsive = false,
   quality = 75,
+  unoptimized = false,
 }: Props) {
   return (
     <Image
@@ -44,6 +50,7 @@ export function OptimizedCover({
       height={height}
       sizes={sizes}
       quality={quality}
+      unoptimized={unoptimized}
       className={className}
       priority={priority}
       style={{

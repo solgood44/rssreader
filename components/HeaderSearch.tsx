@@ -1,9 +1,10 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { ShowListEntry } from "@/lib/show-search";
-import { suggestionShows } from "@/lib/show-search";
+
+const SEARCH_DEBOUNCE_MS = 280;
 
 export function HeaderSearchFallback() {
   return (
@@ -15,7 +16,7 @@ export function HeaderSearchFallback() {
   );
 }
 
-export function HeaderSearch({ showEntries }: { showEntries: ShowListEntry[] }) {
+export function HeaderSearch() {
   const router = useRouter();
   const pathname = usePathname();
   const urlSearchParams = useSearchParams();
@@ -23,12 +24,10 @@ export function HeaderSearch({ showEntries }: { showEntries: ShowListEntry[] }) 
   const searchWrapRef = useRef<HTMLDivElement>(null);
 
   const [searchInput, setSearchInput] = useState("");
+  const [suggestions, setSuggestions] = useState<ShowListEntry[]>([]);
   const [suggestOpen, setSuggestOpen] = useState(false);
-
-  const suggestions = useMemo(
-    () => (searchInput.trim() ? suggestionShows(showEntries, searchInput, 8) : []),
-    [showEntries, searchInput],
-  );
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const qOnShowsPage = pathname === "/shows" ? (urlSearchParams.get("q") ?? "").trim() : "";
 
@@ -36,6 +35,37 @@ export function HeaderSearch({ showEntries }: { showEntries: ShowListEntry[] }) 
     if (pathname === "/shows") setSearchInput(qOnShowsPage);
     else setSearchInput("");
   }, [pathname, qOnShowsPage]);
+
+  useEffect(() => {
+    const q = searchInput.trim();
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    abortRef.current?.abort();
+
+    if (!q) {
+      setSuggestions([]);
+      return;
+    }
+
+    debounceRef.current = setTimeout(() => {
+      const ac = new AbortController();
+      abortRef.current = ac;
+      void (async () => {
+        try {
+          const res = await fetch(`/api/shows/search?q=${encodeURIComponent(q)}`, { signal: ac.signal });
+          if (!res.ok) return;
+          const data = (await res.json()) as { results?: ShowListEntry[] };
+          setSuggestions(Array.isArray(data.results) ? data.results : []);
+        } catch (e) {
+          if (e instanceof Error && e.name === "AbortError") return;
+        }
+      })();
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      abortRef.current?.abort();
+    };
+  }, [searchInput]);
 
   useEffect(() => {
     if (!suggestOpen) return;

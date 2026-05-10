@@ -110,6 +110,7 @@ export function RecentListPage() {
                         height={112}
                         className="recent-list__art-img"
                         sizes="56px"
+                        unoptimized
                       />
                     </span>
                   ) : (

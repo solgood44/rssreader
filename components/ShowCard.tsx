@@ -50,6 +50,7 @@ export function ShowCard({
               height={300}
               sizes={imageSizes ?? DEFAULT_CARD_SIZES}
               quality={imageQuality}
+              unoptimized
             />
           ) : (
             <div className="card__media--placeholder card__media--placeholder--fill" aria-hidden />

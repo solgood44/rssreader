@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Suspense, useCallback, useEffect, useId, useState } from "react";
-import type { ShowListEntry } from "@/lib/show-search";
 import { HeaderSearch, HeaderSearchFallback } from "./HeaderSearch";
 import { SiteFooter } from "./SiteFooter";
 import { ThemeToggle } from "./ThemeToggle";
@@ -13,11 +12,10 @@ const topNav = [{ href: "/shows", label: "All shows" }];
 
 type Props = {
   categories: NavCategory[];
-  showEntries: ShowListEntry[];
   children: React.ReactNode;
 };
 
-export function AppChrome({ categories, showEntries, children }: Props) {
+export function AppChrome({ categories, children }: Props) {
   const [open, setOpen] = useState(false);
   const titleId = useId();
 
@@ -77,7 +75,7 @@ export function AppChrome({ categories, showEntries, children }: Props) {
               </svg>
             </Link>
             <Suspense fallback={<HeaderSearchFallback />}>
-              <HeaderSearch showEntries={showEntries} />
+              <HeaderSearch />
             </Suspense>
           </div>
           <div className="site-header__end">

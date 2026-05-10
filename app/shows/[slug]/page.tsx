@@ -15,8 +15,8 @@ type Props = {
   searchParams: Promise<{ page?: string; sort?: string }>;
 };
 
-/** RSS fetched on demand per show (not at build time). */
-export const revalidate = 3600;
+/** RSS fetched on demand per show (not at build time). Longer window = fewer ISR revalidations at scale. */
+export const revalidate = 21_600;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
