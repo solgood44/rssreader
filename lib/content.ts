@@ -129,17 +129,45 @@ export function showsForCategory(match: string): ShowRecord[] {
   );
 }
 
-/** Resolve shows for a category page: optional RSS allowlist overrides taxonomy match. */
-export function showsForCategoryConfig(data: CategoryFrontmatter): ShowRecord[] {
+/** Resolve shows for a category from an in-memory list (single catalog read). */
+export function showsForCategoryConfigFromRecords(
+  shows: ShowRecord[],
+  data: CategoryFrontmatter,
+): ShowRecord[] {
   const allow = data.category_rss_allowlist;
   if (allow && allow.length > 0) {
     const set = new Set(allow.map(normalizeRssUrl));
-    return getAllShows().filter(
-      (s) => s.data.rss_url && set.has(normalizeRssUrl(s.data.rss_url)),
+    return shows.filter((s) => s.data.rss_url && set.has(normalizeRssUrl(s.data.rss_url)));
+  }
+  if (data.category_match) {
+    const m = data.category_match.toLowerCase();
+    return shows.filter((s) =>
+      (s.data.taxonomy?.category ?? []).some((c) => c.toLowerCase() === m),
     );
   }
-  if (data.category_match) return showsForCategory(data.category_match);
   return [];
+}
+
+/** Resolve shows for a category page: optional RSS allowlist overrides taxonomy match. */
+export function showsForCategoryConfig(data: CategoryFrontmatter): ShowRecord[] {
+  return showsForCategoryConfigFromRecords(getAllShows(), data);
+}
+
+/** Nav drawer rows with show counts (one `getAllShows` pass). */
+export function getCategoryNavRows(): { slug: string; title: string; count: number }[] {
+  const all = getAllShows();
+  const rows = getAllCategories().map((c) => ({
+    slug: c.slug,
+    title: c.data.title || c.slug,
+    count: showsForCategoryConfigFromRecords(all, c.data).length,
+  }));
+  rows.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: "base" }));
+  const dailyIdx = rows.findIndex((c) => c.slug === "daily");
+  if (dailyIdx > 0) {
+    const [daily] = rows.splice(dailyIdx, 1);
+    rows.unshift(daily);
+  }
+  return rows;
 }
 
 /** Preserve editorial order from an RSS allowlist (e.g. Daily category). */

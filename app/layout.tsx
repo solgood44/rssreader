@@ -9,7 +9,7 @@ import { AppChrome } from "@/components/AppChrome";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { PageView } from "@/components/analytics/PageView";
 import { WebsiteJsonLd } from "@/components/WebsiteJsonLd";
-import { getAllCategories } from "@/lib/content";
+import { getCategoryNavRows } from "@/lib/content";
 import { SITE_SEO_DESCRIPTION, SITE_SEO_KEYWORDS } from "@/lib/site-seo";
 import { getSiteUrl } from "@/lib/site";
 import "./globals.css";
@@ -69,22 +69,8 @@ export const metadata: Metadata = {
   },
 };
 
-function navCategories() {
-  const rows = getAllCategories().map((c) => ({
-    slug: c.slug,
-    title: c.data.title || c.slug,
-  }));
-  rows.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: "base" }));
-  const dailyIdx = rows.findIndex((c) => c.slug === "daily");
-  if (dailyIdx > 0) {
-    const [daily] = rows.splice(dailyIdx, 1);
-    rows.unshift(daily);
-  }
-  return rows;
-}
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const categories = navCategories();
+  const categories = getCategoryNavRows();
 
   return (
     <html

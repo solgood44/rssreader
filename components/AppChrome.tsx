@@ -6,7 +6,7 @@ import { HeaderSearch, HeaderSearchFallback } from "./HeaderSearch";
 import { SiteFooter } from "./SiteFooter";
 import { ThemeToggle } from "./ThemeToggle";
 
-export type NavCategory = { slug: string; title: string };
+export type NavCategory = { slug: string; title: string; count: number };
 
 const topNav = [{ href: "/shows", label: "All shows" }];
 
@@ -138,7 +138,10 @@ export function AppChrome({ categories, children }: Props) {
             <div className="nav-drawer__rule" aria-hidden />
             {categories.map((c) => (
               <Link key={c.slug} href={`/category/${c.slug}`} className="nav-drawer__link" onClick={close}>
-                {c.title}
+                <span className="nav-drawer__link-text">{c.title}</span>
+                <span className="nav-drawer__count" aria-label={`${c.count} shows`}>
+                  {c.count}
+                </span>
               </Link>
             ))}
           </nav>

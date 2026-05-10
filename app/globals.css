@@ -403,7 +403,10 @@ html[data-theme="light"] .nav-hamburger:hover {
 }
 
 .nav-drawer__link {
-  display: block;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
   padding: 0.7rem 0.85rem;
   margin: 0 0.35rem;
   border-radius: 8px;
@@ -413,10 +416,24 @@ html[data-theme="light"] .nav-hamburger:hover {
   font-weight: 500;
   transition: background 0.12s ease, color 0.12s ease;
 }
+.nav-drawer__link-text {
+  min-width: 0;
+  flex: 1;
+}
+.nav-drawer__count {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
 .nav-drawer__link:hover {
   background: rgba(255, 255, 255, 0.06);
   color: var(--accent);
   text-decoration: none;
+}
+.nav-drawer__link:hover .nav-drawer__count {
+  color: var(--accent);
 }
 .nav-drawer__rule {
   height: 1px;

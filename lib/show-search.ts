@@ -12,6 +12,17 @@ export type ShowListEntry = {
 
 export type SortMode = "az" | "za" | "random";
 
+/** Strip known host promos prepended to RSS/channel descriptions (e.g. AdFreeBooks). */
+export function sanitizeShowDescription(description: string): string {
+  let s = description.trim();
+  const adfreePrefix =
+    /^\s*https?:\/\/(?:www\.)?adfreebooks\.com\s*[-–—]\s*500\s*\+?\s*audiobooks?,?\s*all\s*ad\s*free\.?\s*/i;
+  while (adfreePrefix.test(s)) {
+    s = s.replace(adfreePrefix, "").trim();
+  }
+  return s;
+}
+
 /** Lowercase, strip punctuation for comparing description to title. */
 function normalizeForShowTextCompare(s: string): string {
   return s
@@ -27,7 +38,7 @@ function normalizeForShowTextCompare(s: string): string {
  * Drops duplicate-of-title text, anything containing a URL, and common host-network blurbs.
  */
 export function shouldShowShowDescription(description: string, title: string): boolean {
-  const desc = description.trim();
+  const desc = sanitizeShowDescription(description).trim();
   if (!desc) return false;
   if (normalizeForShowTextCompare(desc) === normalizeForShowTextCompare(title)) return false;
   if (/https?:\/\/|\bwww\./i.test(desc)) return false;
@@ -51,7 +62,7 @@ export function showsToListEntries(shows: ShowRecord[]): ShowListEntry[] {
   return shows.map((s) => ({
     slug: s.slug,
     title: s.data.title,
-    description: (s.data.description ?? "").trim(),
+    description: sanitizeShowDescription((s.data.description ?? "").trim()),
     categories: normalizeCategories(s.data.taxonomy),
     cover_image: s.data.cover_image,
   }));

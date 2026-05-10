@@ -2,7 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getShow } from "@/lib/content";
 import { getShowListEntriesCached } from "@/lib/show-list-cache";
-import { recommendedShowEntries, shouldShowShowDescription } from "@/lib/show-search";
+import {
+  recommendedShowEntries,
+  sanitizeShowDescription,
+  shouldShowShowDescription,
+} from "@/lib/show-search";
 import { fetchRssEpisodes } from "@/lib/rss";
 import { detectNumberedEpisodes, resolveEpisodeSort } from "@/lib/episode-sort";
 import { EpisodeList } from "@/components/EpisodeList";
@@ -23,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const show = getShow(slug);
   if (!show) return {};
-  const rawMetaDesc = (show.data.description ?? "").trim();
+  const rawMetaDesc = sanitizeShowDescription((show.data.description ?? "").trim());
   const description = shouldShowShowDescription(rawMetaDesc, show.data.title)
     ? rawMetaDesc
     : `Listen to ${show.data.title} in the Podcast library.`;
@@ -59,7 +63,7 @@ export default async function ShowPage({ params, searchParams }: Props) {
   const show = getShow(slug);
   if (!show) notFound();
 
-  const rawDesc = (show.data.description ?? "").trim();
+  const rawDesc = sanitizeShowDescription((show.data.description ?? "").trim());
   const showDesc = shouldShowShowDescription(rawDesc, show.data.title) ? rawDesc : "";
 
   let episodes: Awaited<ReturnType<typeof fetchRssEpisodes>> = [];
