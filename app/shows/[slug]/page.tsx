@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getShow } from "@/lib/content";
 import { getShowListEntriesCached } from "@/lib/show-list-cache";
 import {
+  isMarkdownBodyRedundantWithDescription,
   recommendedShowEntries,
   sanitizeShowDescription,
   shouldShowShowDescription,
@@ -66,6 +67,14 @@ export default async function ShowPage({ params, searchParams }: Props) {
   const rawDesc = sanitizeShowDescription((show.data.description ?? "").trim());
   const showDesc = shouldShowShowDescription(rawDesc, show.data.title) ? rawDesc : "";
 
+  const rawBody = (show.body ?? "").trim();
+  const bodySanitized = rawBody ? sanitizeShowDescription(rawBody) : "";
+  const hideMarkdownBody =
+    Boolean(showDesc) &&
+    Boolean(bodySanitized) &&
+    isMarkdownBodyRedundantWithDescription(bodySanitized, showDesc);
+  const markdownBody = bodySanitized && !hideMarkdownBody ? bodySanitized : "";
+
   let episodes: Awaited<ReturnType<typeof fetchRssEpisodes>> = [];
   let rssError: string | null = null;
   if (show.data.rss_url) {
@@ -121,9 +130,9 @@ export default async function ShowPage({ params, searchParams }: Props) {
         <div>
           <h1 className="show-hero__title">{show.data.title}</h1>
           {showDesc ? <p className="show-hero__desc">{showDesc}</p> : null}
-          {show.body ? (
+          {markdownBody ? (
             <div className="hero__lede" style={{ marginTop: "1rem" }}>
-              <Markdown source={show.body} />
+              <Markdown source={markdownBody} />
             </div>
           ) : null}
           {(show.data.apple_podcasts_url || show.data.spotify_url) && (

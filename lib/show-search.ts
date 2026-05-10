@@ -28,9 +28,35 @@ function normalizeForShowTextCompare(s: string): string {
   return s
     .toLowerCase()
     .replace(/[\u2019']/g, "'")
+    .replace(/\u2026/g, " ")
     .replace(/[\s\-—–]+/g, " ")
     .replace(/[^\p{L}\p{N}\s']/gu, "")
     .trim();
+}
+
+/**
+ * Imported show files often repeat the RSS blurb in both YAML `description` and markdown body.
+ * When both are the same intro (after promo strip), show the hero line only.
+ */
+export function isMarkdownBodyRedundantWithDescription(
+  sanitizedBody: string,
+  sanitizedDescription: string,
+): boolean {
+  const b = sanitizedBody.trim();
+  const d = sanitizedDescription.trim();
+  if (!b || !d) return false;
+  const nb = normalizeForShowTextCompare(b);
+  const nd = normalizeForShowTextCompare(d);
+  if (nb === nd) return true;
+  if (nd.length >= 50 && nb.startsWith(nd)) {
+    const rest = nb.slice(nd.length).trim();
+    if (rest.length <= Math.max(40, Math.floor(nd.length * 0.12))) return true;
+  }
+  if (nb.length >= 50 && nd.startsWith(nb)) {
+    const rest = nd.slice(nb.length).trim();
+    if (rest.length <= Math.max(40, Math.floor(nb.length * 0.12))) return true;
+  }
+  return false;
 }
 
 /**
