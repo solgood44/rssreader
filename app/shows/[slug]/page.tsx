@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAllShows, getShow } from "@/lib/content";
-import { recommendedShowEntries, shouldShowShowDescription, showsToListEntries } from "@/lib/show-search";
+import { getShow } from "@/lib/content";
+import { getShowListEntriesCached } from "@/lib/show-list-cache";
+import { recommendedShowEntries, shouldShowShowDescription } from "@/lib/show-search";
 import { fetchRssEpisodes } from "@/lib/rss";
 import { detectNumberedEpisodes, resolveEpisodeSort } from "@/lib/episode-sort";
 import { EpisodeList } from "@/components/EpisodeList";
@@ -55,8 +56,7 @@ export default async function ShowPage({ params, searchParams }: Props) {
   const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
   const sortParam = sp.sort;
 
-  const allShows = getAllShows();
-  const show = allShows.find((s) => s.slug === slug);
+  const show = getShow(slug);
   if (!show) notFound();
 
   const rawDesc = (show.data.description ?? "").trim();
@@ -79,7 +79,7 @@ export default async function ShowPage({ params, searchParams }: Props) {
 
   const cover = show.data.cover_image;
 
-  const listEntries = showsToListEntries(allShows);
+  const listEntries = getShowListEntriesCached();
   const recommended = recommendedShowEntries(show.slug, listEntries, 6);
 
   return (

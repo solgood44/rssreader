@@ -2,28 +2,34 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
-import { filterShows, sortEntries, type ShowListEntry, type SortMode } from "@/lib/show-search";
+import { useCallback, useEffect, useMemo } from "react";
+import type { DirectoryPageResult } from "@/lib/show-directory";
+import type { SortMode } from "@/lib/show-search";
 import { ShowCard } from "./ShowCard";
-
-const PAGE_SIZE = 48;
 
 function parseSort(s: string | null): SortMode {
   if (s === "za" || s === "random") return s;
   return "az";
 }
 
-export function ShowsDirectoryClient({ entries }: { entries: ShowListEntry[] }) {
+export function ShowsDirectoryClient({ directory }: { directory: DirectoryPageResult }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const sort = parseSort(searchParams.get("sort"));
   const q = (searchParams.get("q") ?? "").trim();
-  const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
-  const seedStr = searchParams.get("seed");
-  const randomSeed =
-    seedStr != null && seedStr !== "" ? parseInt(seedStr, 10) || 1337 : 1337;
+  const urlPage = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
+
+  /** Server clamps page when filters shrink; align URL so pager and bookmarks stay consistent. */
+  useEffect(() => {
+    if (urlPage === directory.page) return;
+    const p = new URLSearchParams(searchParams.toString());
+    if (directory.page <= 1) p.delete("page");
+    else p.set("page", String(directory.page));
+    const qs = p.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname);
+  }, [directory.page, pathname, router, searchParams, urlPage]);
 
   const clearSearchHref = useMemo(() => {
     const p = new URLSearchParams(searchParams.toString());
@@ -32,16 +38,6 @@ export function ShowsDirectoryClient({ entries }: { entries: ShowListEntry[] }) 
     const s = p.toString();
     return s ? `${pathname}?${s}` : pathname;
   }, [pathname, searchParams]);
-
-  const filtered = useMemo(() => filterShows(entries, q), [entries, q]);
-  const sorted = useMemo(
-    () => sortEntries(filtered, sort, randomSeed),
-    [filtered, sort, randomSeed],
-  );
-  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const start = (safePage - 1) * PAGE_SIZE;
-  const slice = sorted.slice(start, start + PAGE_SIZE);
 
   const pushParams = useCallback(
     (mutate: (p: URLSearchParams) => void) => {
@@ -74,12 +70,12 @@ export function ShowsDirectoryClient({ entries }: { entries: ShowListEntry[] }) 
     });
   };
 
+  const { shows, total, totalCatalog, page: safePage, pages: totalPages } = directory;
+
   return (
     <div>
       <p className="hero__lede">
-        {sorted.length === entries.length
-          ? `${entries.length} shows`
-          : `${sorted.length} matching · ${entries.length} total`}
+        {total === totalCatalog ? `${totalCatalog} shows` : `${total} matching · ${totalCatalog} total`}
         {totalPages > 1 ? ` · page ${safePage} of ${totalPages}` : null}
       </p>
 
@@ -119,7 +115,7 @@ export function ShowsDirectoryClient({ entries }: { entries: ShowListEntry[] }) 
         </div>
       </div>
 
-      {slice.length === 0 ? (
+      {shows.length === 0 ? (
         <div>
           <p className="section-sub">No shows match “{q}”. Try another search in the header or clear the filter.</p>
           <p className="section-sub">
@@ -128,7 +124,7 @@ export function ShowsDirectoryClient({ entries }: { entries: ShowListEntry[] }) 
         </div>
       ) : (
         <div className="card-grid">
-          {slice.map((s) => (
+          {shows.map((s) => (
             <ShowCard key={s.slug} show={s} />
           ))}
         </div>
