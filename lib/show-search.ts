@@ -20,6 +20,15 @@ export function sanitizeShowDescription(description: string): string {
   while (adfreePrefix.test(s)) {
     s = s.replace(adfreePrefix, "").trim();
   }
+  /* Trailing “visit our site” plugs (real synopsis often appears before this). */
+  s = s
+    .replace(
+      /\s*View our entire collection of podcasts?\s+at\s+(?:https?:\/\/)?(?:www\.)?solgood\.org\.?\s*/gi,
+      " ",
+    )
+    .trim();
+  s = s.replace(/\s+at\s+(?:https?:\/\/)?(?:www\.)?solgood\.org\.?\s*/gi, " ").trim();
+  s = s.replace(/\s+All Librivox recordings[\s\S]*$/i, "").trim();
   return s;
 }
 
