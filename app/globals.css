@@ -469,6 +469,9 @@ html[data-theme="light"] .nav-hamburger:hover {
 .recent-list__item {
   margin: 0;
 }
+.recent-list__item--completed .recent-list__title {
+  color: var(--muted);
+}
 .recent-list__card {
   display: flex;
   align-items: stretch;
@@ -482,23 +485,22 @@ html[data-theme="light"] .nav-hamburger:hover {
   border-color: rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.045);
 }
+.recent-list__row-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.65rem 0.5rem 0.75rem;
+}
 .recent-list__main {
   flex: 1;
   min-width: 0;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.65rem 0.85rem;
-  border: none;
-  border-radius: 0;
-  background: transparent;
   color: var(--text);
   text-align: left;
-  cursor: pointer;
-  transition: background 0.12s ease;
-}
-.recent-list__main:hover {
-  background: rgba(255, 255, 255, 0.04);
 }
 .recent-list__art,
 .recent-list__art--placeholder {
