@@ -126,6 +126,19 @@ export function resolveShowPageTeaser(
   return { heroParagraph: desc, markdownBody: bodyPass ? body : "" };
 }
 
+/** Plain text for JSON-LD / PodcastSeries (matches visible teaser + metadata fallback). */
+export function getShowStructuredDataPlainDescription(show: ShowRecord): string {
+  const rawDesc = sanitizeShowDescription((show.data.description ?? "").trim());
+  const rawBody = (show.body ?? "").trim();
+  const bodySanitized = rawBody ? sanitizeShowDescription(rawBody) : "";
+  const teaser = resolveShowPageTeaser(rawDesc, bodySanitized, show.data.title);
+  const metaBlurb = (teaser.markdownBody || teaser.heroParagraph).trim();
+  const text = shouldShowShowDescription(metaBlurb, show.data.title)
+    ? metaBlurb
+    : `Listen to ${show.data.title} in the Podcast library.`;
+  return text.replace(/\s+/g, " ").trim().slice(0, 8000);
+}
+
 /**
  * Whether a show description is worth showing on cards and the show hero.
  * Drops duplicate-of-title text, anything containing a URL, and common host-network blurbs.

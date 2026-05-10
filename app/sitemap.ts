@@ -7,7 +7,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const { origin } = getSiteUrl();
   const now = new Date();
 
-  const staticPaths = ["", "/shows", "/blog", "/category", "/author", "/radio-shows", "/recent", "/favorites"] as const;
+  const staticPaths = [
+    "",
+    "/shows",
+    "/blog",
+    "/category",
+    "/author",
+    "/radio-shows",
+    "/recent",
+    "/favorites",
+    "/about",
+  ] as const;
 
   const staticEntries: MetadataRoute.Sitemap = staticPaths.map((path) => ({
     url: `${origin}${path || "/"}`,

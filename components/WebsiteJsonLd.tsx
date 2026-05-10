@@ -1,3 +1,4 @@
+import { getOrganizationLogoAbsoluteUrl, getOrganizationSameAsUrls } from "@/lib/org-seo";
 import { SITE_SEO_DESCRIPTION } from "@/lib/site-seo";
 import { getSiteUrl } from "@/lib/site";
 
@@ -7,6 +8,23 @@ import { getSiteUrl } from "@/lib/site";
 export function WebsiteJsonLd() {
   const { origin } = getSiteUrl();
   const base = origin.replace(/\/$/, "");
+  const logoUrl = getOrganizationLogoAbsoluteUrl(base);
+  const sameAs = getOrganizationSameAsUrls();
+
+  const organization: Record<string, unknown> = {
+    "@type": "Organization",
+    "@id": `${base}/#organization`,
+    name: "Podcast library",
+    url: base,
+    description: SITE_SEO_DESCRIPTION,
+    logo: {
+      "@type": "ImageObject",
+      url: logoUrl,
+    },
+  };
+  if (sameAs.length > 0) {
+    organization.sameAs = sameAs;
+  }
 
   const graph = [
     {
@@ -26,13 +44,7 @@ export function WebsiteJsonLd() {
         "query-input": "required name=search_term_string",
       },
     },
-    {
-      "@type": "Organization",
-      "@id": `${base}/#organization`,
-      name: "Podcast library",
-      url: base,
-      description: SITE_SEO_DESCRIPTION,
-    },
+    organization,
   ];
 
   const payload = { "@context": "https://schema.org", "@graph": graph };

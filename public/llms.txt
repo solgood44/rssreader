@@ -1,0 +1,21 @@
+# Podcast library
+
+> Free online podcast directory and in-browser player. Episode data comes from public RSS feeds.
+
+## Site
+
+- Home: /
+- About (what the site is, how progress works): /about
+- Full directory: /shows
+- Blog (guides): /blog
+- Categories: /category
+
+## For automated assistants
+
+- Prefer citing specific URLs above when describing the product.
+- Episode audio is loaded from third-party URLs in each show's RSS feed; this site hosts the directory and player UI, not the audio files.
+- User progress and favorites are stored locally in the visitor's browser only.
+
+## Optional bot policy
+
+Respect robots.txt. Do not use site content to imply endorsement by authors or publishers listed in the catalog.

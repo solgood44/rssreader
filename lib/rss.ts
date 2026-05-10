@@ -139,6 +139,30 @@ export function parseRssItems(xml: string): RssEpisode[] {
 }
 
 /**
+ * Best-effort “freshness” timestamp for a feed (first item pubDate, else channel lastBuildDate).
+ * Lighter than full episode parse; used for homepage “recently updated” ordering.
+ */
+export async function fetchRssLatestTimestampMs(feedUrl: string): Promise<number | null> {
+  try {
+    const res = await fetch(feedUrl, {
+      next: { revalidate: RSS_CACHE_SECONDS },
+      headers: { Accept: "application/rss+xml, application/xml, text/xml" },
+    });
+    if (!res.ok) return null;
+    const xml = await res.text();
+    const head = xml.slice(0, 150_000);
+    const itemPub = head.match(/<item[^>]*>[\s\S]*?<pubDate>\s*([^<]+)<\/pubDate>/i);
+    const channelLbd = head.match(/<lastBuildDate>\s*([^<]+)<\/lastBuildDate>/i);
+    const raw = (itemPub?.[1] ?? channelLbd?.[1])?.trim();
+    if (!raw) return null;
+    const t = Date.parse(raw);
+    return Number.isFinite(t) ? t : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Cached RSS fetch for server components / build.
  * Next will dedupe in-flight requests per `fetch` + revalidate window.
  */

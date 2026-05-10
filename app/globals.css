@@ -658,6 +658,20 @@ body.has-audio-dock .site-footer {
   font-size: 0.9rem;
   text-align: center;
 }
+.site-footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  justify-content: center;
+  align-items: center;
+}
+.site-footer__nav a {
+  color: var(--muted);
+  font-weight: 500;
+}
+.site-footer__nav a:hover {
+  color: var(--accent);
+}
 
 .hero {
   margin-bottom: 2.5rem;

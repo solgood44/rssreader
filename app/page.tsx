@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getDailyShowsByLatestActivity } from "@/lib/daily-recent-activity";
 import { getDailyFeaturedShows } from "@/lib/daily-shows";
 import { getShowListEntriesCached } from "@/lib/show-list-cache";
 import { SITE_SEO_DESCRIPTION } from "@/lib/site-seo";
@@ -24,9 +25,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
   const dailyFeatured = showsToListEntries(getDailyFeaturedShows());
   const featuredSlugs = new Set(dailyFeatured.map((s) => s.slug));
+
+  const dailyFresh =
+    dailyFeatured.length > 0
+      ? showsToListEntries(await getDailyShowsByLatestActivity()).slice(0, 6)
+      : [];
 
   const catalog = getShowListEntriesCached();
   const shows = catalog
@@ -64,6 +70,24 @@ export default function HomePage() {
           <div className="card-grid">
             {dailyFeatured.map((s) => (
               <ShowCard key={s.slug} show={s} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {dailyFresh.length > 0 ? (
+        <section className="home-daily-fresh" aria-labelledby="home-daily-fresh-heading">
+          <h2 id="home-daily-fresh-heading" className="section-title">
+            Recently updated (Daily)
+          </h2>
+          <p className="section-sub">
+            Same Daily collection as above, ordered by the newest episode activity in each feed—handy when you check
+            back often. Refreshes about every hour.{" "}
+            <Link href="/blog/how-to-use-podcast-library-free-online-listening-guide">Listening guide →</Link>
+          </p>
+          <div className="card-grid">
+            {dailyFresh.map((s) => (
+              <ShowCard key={`fresh-${s.slug}`} show={s} />
             ))}
           </div>
         </section>

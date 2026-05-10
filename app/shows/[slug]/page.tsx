@@ -14,7 +14,9 @@ import { EpisodeList } from "@/components/EpisodeList";
 import { Markdown } from "@/components/Markdown";
 import { OptimizedCover } from "@/components/OptimizedCover";
 import { ShowFavoriteHeart } from "@/components/ShowFavoriteHeart";
+import { ShowPageJsonLd } from "@/components/ShowPageJsonLd";
 import { ShowCard } from "@/components/ShowCard";
+import { getSiteUrl } from "@/lib/site";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -96,8 +98,11 @@ export default async function ShowPage({ params, searchParams }: Props) {
   const listEntries = getShowListEntriesCached();
   const recommended = recommendedShowEntries(show.slug, listEntries, 6);
 
+  const siteBase = getSiteUrl().origin.replace(/\/$/, "");
+
   return (
     <div>
+      <ShowPageJsonLd siteBaseNoSlash={siteBase} show={show} />
       <p className="back">
         <Link href="/shows">← All shows</Link>
       </p>

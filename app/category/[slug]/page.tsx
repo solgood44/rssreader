@@ -8,17 +8,34 @@ import {
   orderShowsByRssAllowlist,
   showsForCategoryConfig,
 } from "@/lib/content";
-import { showsToListEntries } from "@/lib/show-search";
+import { getCategoryDirectoryPage, parseCategorySearchParams } from "@/lib/category-directory";
+import { showsToListEntries, type ShowListEntry } from "@/lib/show-search";
 import { CategoryShowsClient } from "@/components/CategoryShowsClient";
 import { Markdown } from "@/components/Markdown";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+async function CategoryShowsBody({
+  shows,
+  searchParams,
+}: {
+  shows: ShowListEntry[];
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;
+  const { sort, randomSeed, page } = parseCategorySearchParams(sp);
+  const directory = getCategoryDirectoryPage(shows, { sort, randomSeed, page });
+  return <CategoryShowsClient directory={directory} />;
+}
 
 export async function generateStaticParams() {
   return getAllCategories().map((c) => ({ slug: c.slug }));
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Pick<Props, "params">): Promise<Metadata> {
   const { slug } = await params;
   const cat = getCategory(slug);
   if (!cat) return {};
@@ -37,7 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function CategoryPage({ params }: Props) {
+export default async function CategoryPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const cat = getCategory(slug);
   if (!cat || (!cat.data.category_match && !(cat.data.category_rss_allowlist?.length ?? 0))) notFound();
@@ -64,13 +81,8 @@ export default async function CategoryPage({ params }: Props) {
           <Markdown source={cat.body} />
         </div>
       ) : null}
-      <p className="section-sub">
-        {allow && allow.length > 0
-          ? `${shows.length} shows in this collection.`
-          : `${shows.length} shows tagged “${cat.data.category_match?.replace(/\*\*/g, "").trim() ?? ""}”.`}
-      </p>
       <Suspense fallback={<p className="section-sub">Loading shows…</p>}>
-        <CategoryShowsClient entries={shows} />
+        <CategoryShowsBody shows={shows} searchParams={searchParams} />
       </Suspense>
     </div>
   );
