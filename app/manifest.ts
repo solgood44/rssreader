@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
+import { SITE_SEO_DESCRIPTION } from "@/lib/site-seo";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Podcast library",
     short_name: "Podcasts",
-    description: "Calm shows, stories, and sleep-friendly listening.",
+    description: SITE_SEO_DESCRIPTION,
     start_url: "/",
     display: "standalone",
     background_color: "#0c0f14",

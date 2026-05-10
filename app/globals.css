@@ -7,8 +7,8 @@
   --border: #2a3140;
   --player-green: #4ade80;
   --player-green-dim: #22c55e;
-  --font: "DM Sans", system-ui, sans-serif;
-  --font-display: "Fraunces", Georgia, serif;
+  --font: var(--font-dm-sans), system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
   --dock-bg: rgba(15, 17, 20, 0.92);
   --dock-border: rgba(255, 255, 255, 0.08);
   --dock-shadow: 0 -8px 32px rgba(0, 0, 0, 0.45);

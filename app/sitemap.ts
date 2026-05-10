@@ -12,8 +12,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticEntries: MetadataRoute.Sitemap = staticPaths.map((path) => ({
     url: `${origin}${path || "/"}`,
     lastModified: now,
-    changeFrequency: path === "" ? "daily" : "weekly",
-    priority: path === "" ? 1 : 0.85,
+    changeFrequency: path === "" ? "daily" : path === "/shows" ? "daily" : "weekly",
+    priority: path === "" ? 1 : path === "/shows" ? 0.95 : 0.85,
   }));
 
   const shows = getAllShows().map((s) => ({

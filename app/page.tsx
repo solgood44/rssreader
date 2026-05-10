@@ -1,24 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getAllShows } from "@/lib/content";
 import { getDailyFeaturedShows } from "@/lib/daily-shows";
+import { getShowListEntriesCached } from "@/lib/show-list-cache";
+import { SITE_SEO_DESCRIPTION } from "@/lib/site-seo";
 import { showsToListEntries } from "@/lib/show-search";
 import { ShowCard } from "@/components/ShowCard";
 
 /** Homepage: daily row + sample grid (capped for weight). */
 const HOME_SHOW_LIMIT = 18;
 
-const homeDescription =
-  "Calm shows, stories, and sleep-friendly listening. Browse daily episodes, categories, and a full podcast directory.";
-
 export const metadata: Metadata = {
   title: {
-    absolute: "Podcast library",
+    absolute: "Podcast library — free online shows & stories",
   },
-  description: homeDescription,
+  description: SITE_SEO_DESCRIPTION,
   openGraph: {
-    title: "Podcast library — calm shows & stories",
-    description: homeDescription,
+    title: "Podcast library — free online shows & stories",
+    description: SITE_SEO_DESCRIPTION,
     url: "/",
   },
   alternates: {
@@ -27,11 +25,11 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  const allShows = getAllShows();
   const dailyFeatured = showsToListEntries(getDailyFeaturedShows());
   const featuredSlugs = new Set(dailyFeatured.map((s) => s.slug));
 
-  const shows = showsToListEntries(allShows)
+  const catalog = getShowListEntriesCached();
+  const shows = catalog
     .filter((s) => !featuredSlugs.has(s.slug))
     .sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: "base" }))
     .slice(0, HOME_SHOW_LIMIT);
@@ -39,8 +37,8 @@ export default function HomePage() {
   return (
     <div>
       <section className="hero">
-        <h1 className="hero__title">Find something good to listen to</h1>
-        <p className="hero__lede">{homeDescription}</p>
+        <h1 className="hero__title">Your podcast library for calm shows and stories</h1>
+        <p className="hero__lede">{SITE_SEO_DESCRIPTION}</p>
         <div className="hero__cta hero-actions">
           <Link href="/shows" className="hero-actions__primary">
             Browse all shows
@@ -73,7 +71,7 @@ export default function HomePage() {
 
       <h2 className="section-title">More shows</h2>
       <p className="section-sub">
-        A sample of the catalog ({shows.length} of {Math.max(0, allShows.length - featuredSlugs.size)} outside the
+        A sample of the catalog ({shows.length} of {Math.max(0, catalog.length - featuredSlugs.size)} outside the
         daily row). Open the directory for the full list.
       </p>
 

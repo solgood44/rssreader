@@ -1,39 +1,58 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { getAllShows } from "@/lib/content";
-import { showsToListEntries } from "@/lib/show-search";
+import {
+  getDirectoryPage,
+  parseDirectoryPageNumber,
+  parseDirectoryQuery,
+  parseDirectorySeed,
+  parseDirectorySort,
+} from "@/lib/show-directory";
 import { ShowsDirectoryClient } from "@/components/ShowsDirectoryClient";
 
 export const metadata: Metadata = {
   title: "All shows",
-  description: "Search and browse the full podcast directory — stories, sleep audio, learning, and more.",
+  description:
+    "Browse the full podcast library A–Z, filter by title, and open any show to stream episodes in your browser.",
   alternates: { canonical: "/shows" },
+  openGraph: {
+    title: "All shows | Podcast library",
+    description:
+      "Browse the full podcast library A–Z, filter by title, and open any show to stream episodes in your browser.",
+    url: "/shows",
+  },
 };
 
 function ShowsFallback() {
-  return (
-    <div>
-      <h1 className="hero__title">All shows</h1>
-      <p className="hero__lede">Loading directory…</p>
-    </div>
-  );
+  return <p className="hero__lede">Loading directory…</p>;
 }
 
-export default function ShowsDirectoryPage() {
-  const entries = showsToListEntries(getAllShows());
+function spFirst(v: string | string[] | undefined): string | undefined {
+  if (v == null) return undefined;
+  return Array.isArray(v) ? v[0] : v;
+}
 
+async function ShowsDirectoryResults({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;
+  const q = parseDirectoryQuery(spFirst(sp.q));
+  const sort = parseDirectorySort(spFirst(sp.sort));
+  const randomSeed = parseDirectorySeed(spFirst(sp.seed));
+  const page = parseDirectoryPageNumber(spFirst(sp.page));
+  const directory = getDirectoryPage({ q, sort, randomSeed, page });
+  return <ShowsDirectoryClient directory={directory} />;
+}
+
+export default function ShowsDirectoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   return (
-    <>
-      <section className="hero">
-        <h1 className="hero__title">All shows</h1>
-        <p className="hero__lede">
-          Search by title in the header, or browse categories to find something that fits your mood.
-        </p>
-      </section>
-
-      <Suspense fallback={<ShowsFallback />}>
-        <ShowsDirectoryClient entries={entries} />
-      </Suspense>
-    </>
+    <Suspense fallback={<ShowsFallback />}>
+      <ShowsDirectoryResults searchParams={searchParams} />
+    </Suspense>
   );
 }
