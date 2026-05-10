@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllShows, getShow } from "@/lib/content";
-import { recommendedShowEntries, showsToListEntries } from "@/lib/show-search";
+import { recommendedShowEntries, shouldShowShowDescription, showsToListEntries } from "@/lib/show-search";
 import { fetchRssEpisodes } from "@/lib/rss";
 import { detectNumberedEpisodes, resolveEpisodeSort } from "@/lib/episode-sort";
 import { EpisodeList } from "@/components/EpisodeList";
@@ -22,7 +22,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const show = getShow(slug);
   if (!show) return {};
-  const description = show.data.description?.trim() || `Listen to ${show.data.title} in the Podcast library.`;
+  const rawMetaDesc = (show.data.description ?? "").trim();
+  const description = shouldShowShowDescription(rawMetaDesc, show.data.title)
+    ? rawMetaDesc
+    : `Listen to ${show.data.title} in the Podcast library.`;
   const images = show.data.cover_image
     ? [{ url: show.data.cover_image, width: 640, height: 640, alt: show.data.title }]
     : undefined;
@@ -56,15 +59,8 @@ export default async function ShowPage({ params, searchParams }: Props) {
   const show = allShows.find((s) => s.slug === slug);
   if (!show) notFound();
 
-  const normalize = (s: string) =>
-    s
-      .toLowerCase()
-      .replace(/[’']/g, "'")
-      .replace(/[\s\-—–]+/g, " ")
-      .replace(/[^\p{L}\p{N}\s']/gu, "")
-      .trim();
   const rawDesc = (show.data.description ?? "").trim();
-  const showDesc = rawDesc && normalize(rawDesc) !== normalize(show.data.title) ? rawDesc : "";
+  const showDesc = shouldShowShowDescription(rawDesc, show.data.title) ? rawDesc : "";
 
   let episodes: Awaited<ReturnType<typeof fetchRssEpisodes>> = [];
   let rssError: string | null = null;

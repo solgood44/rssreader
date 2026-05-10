@@ -12,6 +12,35 @@ export type ShowListEntry = {
 
 export type SortMode = "az" | "za" | "random";
 
+/** Lowercase, strip punctuation for comparing description to title. */
+function normalizeForShowTextCompare(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[\u2019']/g, "'")
+    .replace(/[\s\-—–]+/g, " ")
+    .replace(/[^\p{L}\p{N}\s']/gu, "")
+    .trim();
+}
+
+/**
+ * Whether a show description is worth showing on cards and the show hero.
+ * Drops duplicate-of-title text, anything containing a URL, and common host-network blurbs.
+ */
+export function shouldShowShowDescription(description: string, title: string): boolean {
+  const desc = description.trim();
+  if (!desc) return false;
+  if (normalizeForShowTextCompare(desc) === normalizeForShowTextCompare(title)) return false;
+  if (/https?:\/\/|\bwww\./i.test(desc)) return false;
+
+  const low = desc.toLowerCase();
+  if (low.includes("solgoodmedia.com")) return false;
+  if (low.includes("listen to hundreds of audiobooks")) return false;
+  if (low.includes("thousands of short stories")) return false;
+  if (low.includes("thousands of short audio")) return false;
+
+  return true;
+}
+
 function normalizeCategories(raw: ShowRecord["data"]["taxonomy"]): string[] {
   const c = raw?.category;
   if (!c) return [];

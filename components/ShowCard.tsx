@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { ShowListEntry } from "@/lib/show-search";
+import { shouldShowShowDescription, type ShowListEntry } from "@/lib/show-search";
 import { OptimizedCover } from "./OptimizedCover";
 import { ShowFavoriteHeart } from "./ShowFavoriteHeart";
 
@@ -22,15 +22,8 @@ export function ShowCard({
 }) {
   const cover = show.cover_image;
   const href = `/shows/${show.slug}`;
-  const normalize = (s: string) =>
-    s
-      .toLowerCase()
-      .replace(/[’']/g, "'")
-      .replace(/[\s\-—–]+/g, " ")
-      .replace(/[^\p{L}\p{N}\s']/gu, "")
-      .trim();
   const desc = (show.description ?? "").trim();
-  const showDesc = desc && normalize(desc) !== normalize(show.title) ? desc : "";
+  const showDesc = shouldShowShowDescription(desc, show.title) ? desc : "";
 
   return (
     <article className="card">
