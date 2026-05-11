@@ -69,6 +69,7 @@ export default async function BlogPostPage({ params }: Props) {
             sizes="(max-width: 1100px) 100vw, 1100px"
             responsive
             priority
+            unoptimized
           />
         </figure>
       ) : null}

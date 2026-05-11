@@ -121,6 +121,7 @@ export default async function ShowPage({ params, searchParams }: Props) {
                 responsive
                 priority
                 quality={78}
+                unoptimized
               />
             </div>
           ) : (
