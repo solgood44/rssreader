@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useId, useState } from "react";
+import { subscribeToKit } from "@/lib/newsletter-subscribe";
 
 type Props = {
   /** Compact for footer; prominent for blog/about. */
@@ -22,19 +23,7 @@ export function NewsletterSignup({ variant = "compact", className }: Props) {
     setError("");
 
     try {
-      const res = await fetch("/api/newsletter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = (await res.json()) as { ok?: boolean; error?: string };
-
-      if (!res.ok || !data.ok) {
-        setStatus("error");
-        setError(data.error || "Something went wrong. Please try again.");
-        return;
-      }
-
+      await subscribeToKit(email);
       setStatus("success");
       setEmail("");
     } catch {
@@ -62,7 +51,7 @@ export function NewsletterSignup({ variant = "compact", className }: Props) {
 
       {status === "success" ? (
         <p className="newsletter-signup__success" role="status">
-          Thanks — check your inbox to confirm your subscription.
+          Almost done — check your inbox for a confirmation link from Kit to finish subscribing.
         </p>
       ) : (
         <form className="newsletter-signup__form" onSubmit={handleSubmit} noValidate>
@@ -74,7 +63,7 @@ export function NewsletterSignup({ variant = "compact", className }: Props) {
               id={emailId}
               className="newsletter-signup__input"
               type="email"
-              name="email"
+              name="email_address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
