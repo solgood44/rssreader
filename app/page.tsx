@@ -83,7 +83,7 @@ export default async function HomePage() {
           <p className="section-sub">
             Same Daily collection as above, ordered by the newest episode activity in each feed—handy when you check
             back often. Refreshes about every hour.{" "}
-            <Link href="/blog/how-to-use-podcast-library-free-online-listening-guide">Listening guide →</Link>
+            <Link href="/blog/how-to-listen-to-podcasts-in-your-browser">Listening guide →</Link>
           </p>
           <div className="card-grid">
             {dailyFresh.map((s) => (

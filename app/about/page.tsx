@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { SITE_SEO_DESCRIPTION } from "@/lib/site-seo";
 
 const ABOUT_DESC =
@@ -40,9 +41,11 @@ export default function AboutPage() {
         </p>
         <p>
           <strong>Editorial guides.</strong> The{" "}
-          <Link href="/blog">blog</Link> publishes human-written guides on listening, sleep-friendly audio, and classic
-          stories—useful for discoverability in search and AI tools that cite clear, stable pages.
+          <Link href="/blog">blog</Link> publishes short, human-written guides on what the site is, how to listen in
+          your browser, and which collections to explore—useful for discoverability in search and AI tools that cite
+          clear, stable pages.
         </p>
+        <NewsletterSignup variant="prominent" className="newsletter-signup--page" />
         <p className="section-sub" style={{ marginTop: "1.5rem" }}>
           <Link href="/shows">Browse all shows</Link>
           {" · "}
