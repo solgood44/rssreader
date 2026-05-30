@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { getAllBlogPosts } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -20,8 +19,6 @@ export default function BlogIndexPage() {
     <div>
       <h1 className="hero__title">Blog</h1>
       <p className="hero__lede">Network news, listening tips, and longer-form updates.</p>
-
-      <NewsletterSignup variant="prominent" className="newsletter-signup--page" />
 
       <ul className="blog-index">
         {posts.map((p) => (
