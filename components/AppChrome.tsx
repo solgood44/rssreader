@@ -8,7 +8,10 @@ import { ThemeToggle } from "./ThemeToggle";
 
 export type NavCategory = { slug: string; title: string; count: number };
 
-const topNav = [{ href: "/shows", label: "All shows" }];
+const topNav = [
+  { href: "/shows", label: "All shows" },
+  { href: "/resources", label: "Resources" },
+];
 
 type Props = {
   categories: NavCategory[];
@@ -128,6 +131,9 @@ export function AppChrome({ categories, children }: Props) {
             </Link>
             <Link href="/blog" className="nav-drawer__link" onClick={close}>
               Blog
+            </Link>
+            <Link href="/resources" className="nav-drawer__link" onClick={close}>
+              Resources
             </Link>
             <Link href="/author" className="nav-drawer__link" onClick={close}>
               Authors
